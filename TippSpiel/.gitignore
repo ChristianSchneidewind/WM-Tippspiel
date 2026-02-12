@@ -1,0 +1,83 @@
+﻿# =========================
+# Build-Ergebnisse
+# =========================
+bin/
+obj/
+out/
+
+# =========================
+# Visual Studio / Rider / VS Code
+# =========================
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# =========================
+# .NET Core
+# =========================
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# =========================
+# Logs & temporäre Dateien
+# =========================
+*.log
+*.tmp
+*.temp
+
+# =========================
+# Publish-Ordner
+# =========================
+publish/
+wwwroot/lib/
+
+# =========================
+# Test-Ergebnisse
+# =========================
+TestResults/
+coverage/
+coverage.*
+
+# =========================
+# NuGet
+# =========================
+*.nupkg
+*.snupkg
+.nuget/packages/
+.nuget/package.cache
+
+# =========================
+# Secrets / Konfig
+# =========================
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+# =========================
+# Datenbanken
+# =========================
+*.mdf
+*.ldf
+*.db
+*.sqlite
+
+# =========================
+# OS-Dateien
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# Backup-Dateien
+# =========================
+*.bak
+*.old
+*.orig
+
+
