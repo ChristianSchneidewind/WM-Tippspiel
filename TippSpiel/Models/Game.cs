@@ -11,9 +11,9 @@ namespace TippSpiel.Models
             public string HomeTeam {get; set;} = string.Empty;
             [Required]
             public string AwayTeam {get; set;} = string.Empty;
-            public DateTime KickOff {get; set;}
-            public int HomeTeamScore {get; set;}
-            public int AwayTeamScore{get; set;}
+            public DateTimeOffset KickOff {get; set;}
+            public int? HomeTeamScore {get; set;}
+            public int? AwayTeamScore{get; set;}
 
             public int GroupId {get; set;}
             public Group? Group {get; set;}
