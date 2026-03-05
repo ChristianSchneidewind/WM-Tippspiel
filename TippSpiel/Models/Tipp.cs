@@ -8,8 +8,8 @@ namespace TippSpiel.Models
     {
         public int Id {get; set;}
 
-        public int MatchId {get; set;}
-        public Match? Match {get; set;}
+        public int GameId {get; set;}
+        public Game? Game {get; set;}
         [Required]
         public string UserId {get; set;} = string.Empty;
         [ForeignKey("UserId")]

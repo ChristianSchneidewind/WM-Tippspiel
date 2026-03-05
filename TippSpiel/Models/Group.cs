@@ -9,6 +9,6 @@ namespace TippSpiel.Models
         public int Id{get; set;}
         [Required]
         public string Name {get; set;} = string.Empty;
-        public ICollection<Match> Matches {get; set;} = new List<Match>();
+        public ICollection<Game> Games {get; set;} = new List<Game>();
     }
 }
