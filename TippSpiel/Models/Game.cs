@@ -14,6 +14,7 @@ namespace TippSpiel.Models
             public DateTimeOffset KickOff {get; set;}
             public int? HomeTeamScore {get; set;}
             public int? AwayTeamScore{get; set;}
+            public int? MatchNumber { get; set; }
 
             public int GroupId {get; set;}
             public Group? Group {get; set;}

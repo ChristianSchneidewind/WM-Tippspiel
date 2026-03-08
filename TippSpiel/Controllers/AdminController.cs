@@ -1,69 +1,20 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Options;
 using TippSpiel.Data;
 using TippSpiel.Models;
 using TippSpiel.Models.Admin;
 
 namespace TippSpiel.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly IGameRepository _repository;
-        private readonly AdminOptions _options;
 
-        public AdminController(IGameRepository repository, IOptions<AdminOptions> options)
+        public AdminController(IGameRepository repository)
         {
             _repository = repository;
-            _options = options.Value;
-        }
-
-        [AllowAnonymous]
-        public IActionResult Login()
-        {
-            return View(new AdminLoginViewModel());
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(AdminLoginViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            if (!string.Equals(model.Username, _options.Username, StringComparison.Ordinal) ||
-                !string.Equals(model.Password, _options.Password, StringComparison.Ordinal))
-            {
-                ModelState.AddModelError(string.Empty, "Ungültige Zugangsdaten.");
-                return View(model);
-            }
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, model.Username),
-                new Claim(ClaimTypes.Role, "Admin")
-            };
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction(nameof(Login));
         }
 
         public IActionResult Index()

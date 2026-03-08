@@ -1,0 +1,60 @@
+@model TippSpiel.Models.ViewModels.FinalsViewModel
+@{
+    ViewData["Title"] = "Finalrunde";
+}
+
+<h1 class="display-6 mb-4">Finalrunde</h1>
+
+@if (Model.Rounds.Count == 0)
+{
+    <div class="alert alert-info">Noch keine Finalrunden-Spiele vorhanden.</div>
+}
+else
+{
+    <div class="d-flex flex-column gap-4">
+        @foreach (var round in Model.Rounds)
+        {
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <strong>@round.Name</strong>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Kickoff</th>
+                                    <th>Heim</th>
+                                    <th>Gast</th>
+                                    <th class="text-center">Ergebnis</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var game in round.Games)
+                                {
+                                    <tr>
+                                        <td>@(game.MatchNumber?.ToString() ?? "-")</td>
+                                        <td>@(game.KickOff == default ? "-" : game.KickOff.ToLocalTime().ToString("dd.MM.yyyy HH:mm"))</td>
+                                        <td>@game.HomeTeam</td>
+                                        <td>@game.AwayTeam</td>
+                                        <td class="text-center">
+                                            @if (game.HomeTeamScore.HasValue && game.AwayTeamScore.HasValue)
+                                            {
+                                                <span>@game.HomeTeamScore : @game.AwayTeamScore</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,33 @@
+@using Microsoft.AspNetCore.Identity
+@using TippSpiel.Models
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+<ul class="navbar-nav ms-auto">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item d-flex align-items-center me-2">
+            <span class="navbar-text">@User.Identity?.Name</span>
+        </li>
+        @if (User.IsInRole("Admin"))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Admin</a>
+            </li>
+        }
+        <li class="nav-item">
+            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                <button type="submit" class="btn btn-link nav-link">Logout</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Registrieren</a>
+        </li>
+    }
+</ul>

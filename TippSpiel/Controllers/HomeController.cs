@@ -1,6 +1,9 @@
 using System.Diagnostics;
 using System.Linq;
+using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TippSpiel.Models;
 using TippSpiel.Data;
 using TippSpiel.Models.ViewModels;
@@ -20,12 +23,34 @@ namespace TippSpiel.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var nextGame = _db.Games
+                .Include(game => game.Group)
+                .AsEnumerable()
+                .OrderBy(game => game.KickOff)
+                .Select(game => new NextGameViewModel
+                {
+                    HomeTeam = game.HomeTeam,
+                    AwayTeam = game.AwayTeam,
+                    GroupName = game.Group != null ? game.Group.Name : string.Empty,
+                    KickOff = game.KickOff
+                })
+                .FirstOrDefault();
+
+            var model = new HomeIndexViewModel
+            {
+                GroupCount = _db.Groups.Count(),
+                GameCount = _db.Games.Count(),
+                TippCount = _db.Tipps.Count(),
+                NextGame = nextGame
+            };
+
+            return View(model);
         }
 
         public IActionResult Groups()
         {
             var groups = _repository.Groups
+                .Where(group => !string.Equals(group.Name, "Finalrunde", StringComparison.OrdinalIgnoreCase))
                 .OrderBy(group => group.Name)
                 .Select(group => new GroupOverviewViewModel
                 {
@@ -46,11 +71,54 @@ namespace TippSpiel.Controllers
             return View(groups);
         }
 
+        public IActionResult Finals()
+        {
+            var finalStageGames = _repository.Games
+                .Where(game => game.Group != null && string.Equals(game.Group.Name, "Finalrunde", StringComparison.OrdinalIgnoreCase))
+                .AsEnumerable()
+                .OrderBy(game => game.MatchNumber ?? int.MaxValue)
+                .ThenBy(game => game.KickOff)
+                .ToList();
+
+            var rounds = new List<KnockoutRoundViewModel>
+            {
+                BuildRound("Sechzehntelfinale", finalStageGames, 73, 88),
+                BuildRound("Achtelfinale", finalStageGames, 89, 96),
+                BuildRound("Viertelfinale", finalStageGames, 97, 100),
+                BuildRound("Halbfinale", finalStageGames, 101, 102),
+                BuildRound("Spiel um Platz 3", finalStageGames, 103, 103),
+                BuildRound("Finale", finalStageGames, 104, 104)
+            };
+
+            var model = new FinalsViewModel
+            {
+                Rounds = rounds.Where(round => round.Games.Count > 0).ToList()
+            };
+
+            return View(model);
+        }
+
+        private static KnockoutRoundViewModel BuildRound(string name, List<Game> games, int start, int end)
+        {
+            var roundGames = games
+                .Where(game => game.MatchNumber.HasValue && game.MatchNumber.Value >= start && game.MatchNumber.Value <= end)
+                .OrderBy(game => game.MatchNumber)
+                .ThenBy(game => game.KickOff)
+                .ToList();
+
+            return new KnockoutRoundViewModel
+            {
+                Name = name,
+                Games = roundGames
+            };
+        }
+
         public IActionResult Schedule()
         {
             var model = new ScheduleViewModel
             {
                 Games = _repository.Games
+                    .AsEnumerable()
                     .OrderBy(game => game.KickOff)
                     .ToList()
             };
