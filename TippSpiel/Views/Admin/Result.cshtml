@@ -1,0 +1,29 @@
+@model TippSpiel.Models.Admin.AdminResultViewModel
+
+@{
+    ViewData["Title"] = "Ergebnis eintragen";
+}
+
+<h1>Ergebnis eintragen</h1>
+
+<p><strong>@Model.HomeTeam</strong> vs <strong>@Model.AwayTeam</strong></p>
+
+<form asp-action="Result" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input asp-for="Id" type="hidden" />
+
+    <div class="mb-3">
+        <label asp-for="HomeTeamScore" class="form-label"></label>
+        <input asp-for="HomeTeamScore" class="form-control" type="number" min="0" />
+        <span asp-validation-for="HomeTeamScore" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AwayTeamScore" class="form-label"></label>
+        <input asp-for="AwayTeamScore" class="form-control" type="number" min="0" />
+        <span asp-validation-for="AwayTeamScore" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Speichern</button>
+    <a asp-action="Index" class="btn btn-link">Zurück</a>
+</form>

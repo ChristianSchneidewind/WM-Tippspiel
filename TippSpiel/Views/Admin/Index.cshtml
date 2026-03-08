@@ -1,0 +1,79 @@
+@model TippSpiel.Models.Admin.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h1>Admin Dashboard</h1>
+
+<form asp-action="Logout" method="post" class="mb-3">
+    <button type="submit" class="btn btn-outline-secondary">Logout</button>
+</form>
+
+<section class="mb-4">
+    <h2>Gruppen</h2>
+    <a asp-action="CreateGroup" class="btn btn-primary mb-2">Gruppe anlegen</a>
+
+    @if (!Model.Groups.Any())
+    {
+        <p>Noch keine Gruppen angelegt.</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var group in Model.Groups)
+            {
+                <li>@group.Name (@group.Games.Count Spiele)</li>
+            }
+        </ul>
+    }
+</section>
+
+<section>
+    <h2>Spiele</h2>
+    <a asp-action="CreateGame" class="btn btn-primary mb-2">Spiel anlegen</a>
+
+    @if (!Model.Games.Any())
+    {
+        <p>Noch keine Spiele angelegt.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Spiel</th>
+                    <th>Gruppe</th>
+                    <th>Anstoß</th>
+                    <th>Ergebnis</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var game in Model.Games)
+                {
+                    <tr>
+                        <td>@game.HomeTeam vs @game.AwayTeam</td>
+                        <td>@game.Group?.Name</td>
+                        <td>@game.KickOff.LocalDateTime.ToString("g")</td>
+                        <td>
+                            @if (game.HomeTeamScore.HasValue && game.AwayTeamScore.HasValue)
+                            {
+                                <span>@game.HomeTeamScore : @game.AwayTeamScore</span>
+                            }
+                            else
+                            {
+                                <span>Offen</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="EditGame" asp-route-id="@game.Id">Bearbeiten</a>
+                            |
+                            <a asp-action="Result" asp-route-id="@game.Id">Ergebnis</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>

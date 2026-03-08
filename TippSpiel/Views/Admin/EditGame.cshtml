@@ -1,0 +1,51 @@
+@model TippSpiel.Models.Admin.AdminGameEditViewModel
+
+@{
+    ViewData["Title"] = "Spiel bearbeiten";
+}
+
+<h1>Spiel bearbeiten</h1>
+
+<form asp-action="EditGame" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input asp-for="Id" type="hidden" />
+
+    <div class="mb-3">
+        <label asp-for="HomeTeam" class="form-label"></label>
+        <input asp-for="HomeTeam" class="form-control" />
+        <span asp-validation-for="HomeTeam" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AwayTeam" class="form-label"></label>
+        <input asp-for="AwayTeam" class="form-control" />
+        <span asp-validation-for="AwayTeam" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="KickOff" class="form-label"></label>
+        <input asp-for="KickOff" class="form-control" type="datetime-local" />
+        <span asp-validation-for="KickOff" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="GroupId" class="form-label"></label>
+        <select asp-for="GroupId" asp-items="ViewBag.Groups" class="form-select"></select>
+        <span asp-validation-for="GroupId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="HomeTeamScore" class="form-label"></label>
+        <input asp-for="HomeTeamScore" class="form-control" type="number" min="0" />
+        <span asp-validation-for="HomeTeamScore" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AwayTeamScore" class="form-label"></label>
+        <input asp-for="AwayTeamScore" class="form-control" type="number" min="0" />
+        <span asp-validation-for="AwayTeamScore" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Speichern</button>
+    <a asp-action="Index" class="btn btn-link">Zurück</a>
+</form>
