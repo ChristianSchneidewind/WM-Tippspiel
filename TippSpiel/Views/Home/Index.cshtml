@@ -1,8 +1,38 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Start";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mb-5">
+    <h1 class="display-5">WM Tippspiel 2026</h1>
+    <p class="lead">Übersicht über Gruppen, Spielplan und Rankings.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Gruppenübersicht</h5>
+                <p class="card-text">Alle Gruppen mit Teams und Ergebnissen.</p>
+                <a class="btn btn-primary" asp-controller="Home" asp-action="Groups">Zur Übersicht</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Spielplan</h5>
+                <p class="card-text">Alle Spiele nach Datum sortiert.</p>
+                <a class="btn btn-primary" asp-controller="Home" asp-action="Schedule">Zum Spielplan</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Tipps & Rankings</h5>
+                <p class="card-text">Aktueller Punktestand aller Teilnehmer.</p>
+                <a class="btn btn-primary" asp-controller="Home" asp-action="Rankings">Zu den Rankings</a>
+            </div>
+        </div>
+    </div>
 </div>

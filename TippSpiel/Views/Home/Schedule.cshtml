@@ -1,0 +1,48 @@
+@model TippSpiel.Models.ViewModels.ScheduleViewModel
+@{
+    ViewData["Title"] = "Spielplan";
+}
+
+<h1 class="display-6 mb-4">Spielplan</h1>
+
+@if (Model.Games.Count == 0)
+{
+    <div class="alert alert-info">Noch keine Spiele vorhanden.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Gruppe</th>
+                    <th>Heim</th>
+                    <th>Gast</th>
+                    <th class="text-center">Ergebnis</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var game in Model.Games)
+                {
+                    <tr>
+                        <td>@(game.KickOff == default ? "-" : game.KickOff.ToLocalTime().ToString("dd.MM.yyyy HH:mm"))</td>
+                        <td>@game.Group?.Name</td>
+                        <td>@game.HomeTeam</td>
+                        <td>@game.AwayTeam</td>
+                        <td class="text-center">
+                            @if (game.HomeTeamScore.HasValue && game.AwayTeamScore.HasValue)
+                            {
+                                <span>@game.HomeTeamScore : @game.AwayTeamScore</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
