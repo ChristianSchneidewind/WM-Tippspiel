@@ -52,19 +52,97 @@ namespace TippSpiel.Controllers
             var groups = _repository.Groups
                 .Where(group => !string.Equals(group.Name, "Finalrunde", StringComparison.OrdinalIgnoreCase))
                 .OrderBy(group => group.Name)
-                .Select(group => new GroupOverviewViewModel
+                .AsEnumerable()
+                .Select(group =>
                 {
-                    GroupId = group.Id,
-                    GroupName = group.Name,
-                    Teams = group.Games
+                    var games = group.Games
+                        .OrderBy(game => game.KickOff)
+                        .ToList();
+
+                    var teams = games
                         .SelectMany(game => new[] { game.HomeTeam, game.AwayTeam })
                         .Where(team => !string.IsNullOrWhiteSpace(team))
                         .Distinct()
                         .OrderBy(team => team)
-                        .ToList(),
-                    Games = group.Games
-                        .OrderBy(game => game.KickOff)
-                        .ToList()
+                        .ToList();
+
+                    var standings = teams.ToDictionary(
+                        team => team,
+                        team => new GroupTableRowViewModel
+                        {
+                            TeamName = team
+                        });
+
+                    var finishedGames = games
+                        .Where(game => game.HomeTeamScore.HasValue && game.AwayTeamScore.HasValue)
+                        .ToList();
+
+                    foreach (var game in finishedGames)
+                    {
+                        var homeTeam = game.HomeTeam;
+                        var awayTeam = game.AwayTeam;
+
+                        if (!standings.ContainsKey(homeTeam) || !standings.ContainsKey(awayTeam))
+                        {
+                            continue;
+                        }
+
+                        var home = standings[homeTeam];
+                        var away = standings[awayTeam];
+
+                        var homeGoals = game.HomeTeamScore!.Value;
+                        var awayGoals = game.AwayTeamScore!.Value;
+
+                        home.GamesPlayed++;
+                        away.GamesPlayed++;
+
+                        home.GoalsFor += homeGoals;
+                        home.GoalsAgainst += awayGoals;
+
+                        away.GoalsFor += awayGoals;
+                        away.GoalsAgainst += homeGoals;
+
+                        if (homeGoals > awayGoals)
+                        {
+                            home.Wins++;
+                            away.Losses++;
+                            home.Points += 3;
+                        }
+                        else if (homeGoals < awayGoals)
+                        {
+                            away.Wins++;
+                            home.Losses++;
+                            away.Points += 3;
+                        }
+                        else
+                        {
+                            home.Draws++;
+                            away.Draws++;
+                            home.Points += 1;
+                            away.Points += 1;
+                        }
+                    }
+
+                    var tableRows = standings.Values
+                        .OrderByDescending(row => row.Points)
+                        .ThenByDescending(row => row.GoalDifference)
+                        .ThenByDescending(row => row.GoalsFor)
+                        .ThenBy(row => row.TeamName)
+                        .ToList();
+
+                    for (int i = 0; i < tableRows.Count; i++)
+                    {
+                        tableRows[i].Position = i + 1;
+                    }
+
+                    return new GroupOverviewViewModel
+                    {
+                        GroupId = group.Id,
+                        GroupName = group.Name,
+                        Teams = teams,
+                        Games = games,
+                        TableRows = tableRows
+                    };
                 })
                 .ToList();
 
@@ -141,7 +219,10 @@ namespace TippSpiel.Controllers
                 .ThenBy(entry => entry.UserName)
                 .ToList();
 
-            return View(new RankingsViewModel { Entries = entries });
+            return View(new RankingsViewModel
+            {
+                Entries = entries
+            });
         }
 
         public IActionResult Privacy()
@@ -152,7 +233,10 @@ namespace TippSpiel.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            });
         }
     }
 }
