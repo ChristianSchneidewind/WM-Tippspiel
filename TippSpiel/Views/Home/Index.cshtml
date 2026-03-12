@@ -4,60 +4,81 @@
 }
 
 <div class="text-center mb-5">
-    <h1 class="display-5">WM Tippspiel 2026</h1>
-    <p class="lead">Übersicht über Gruppen, Spielplan und Rankings.</p>
+    <div class="hero-maskot-container shadow-lg">
+        
+        <img src="/images/FIFA_World_Cup_2026_Mascot.webp" 
+             alt="WM Maskottchen" 
+             class="img-fluid"
+             style="max-height: 380px; width: auto; display: block; background-color: transparent;">
+        
+        <div class="maskot-overlay">
+            <h1 class="display-4 fw-bold text-white mb-2" style="text-shadow: 2px 4px 8px rgba(0,0,0,0.8);">
+                WM 2026
+            </h1>
+            <a class="btn btn-warning btn-lg fw-bold shadow border-0 text-white"
+               asp-controller="Home" asp-action="Schedule" 
+               style="border-width: 2px;">
+                JETZT TIPPEN
+            </a>
+        </div>
+    </div>
 </div>
+
 
 @if (Model.NextGame != null)
 {
-    <div class="alert alert-info d-flex flex-column flex-md-row justify-content-between align-items-md-center">
-        <div>
-            <strong>Nächstes Spiel:</strong> @Model.NextGame.HomeTeam vs. @Model.NextGame.AwayTeam
-            @if (!string.IsNullOrWhiteSpace(Model.NextGame.GroupName))
-            {
-                <span class="ms-2 badge bg-secondary">Gruppe @Model.NextGame.GroupName</span>
-            }
-        </div>
-        <div class="mt-2 mt-md-0">
-            @(Model.NextGame.KickOff == default ? "Datum folgt" : Model.NextGame.KickOff.ToLocalTime().ToString("dd.MM.yyyy HH:mm"))
+    <div class="card mb-4 border-0 shadow-sm" style="background: rgba(10, 54, 34, 0.85); color: white;">
+        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center py-2">
+            <div>
+                <strong class="text-warning">Nächstes Spiel:</strong> @Model.NextGame.HomeTeam vs. @Model.NextGame.AwayTeam
+                @if (!string.IsNullOrWhiteSpace(Model.NextGame.GroupName))
+                {
+                    <span class="ms-2 badge rounded-pill" style="background: rgba(255,255,255,0.2);">Gruppe @Model.NextGame.GroupName</span>
+                }
+            </div>
+            <div class="mt-2 mt-md-0 opacity-75">
+                @(Model.NextGame.KickOff == default ? "Datum folgt" : Model.NextGame.KickOff.ToLocalTime().ToString("dd.MM.yyyy HH:mm"))
+            </div>
         </div>
     </div>
 }
 
 <div class="row g-4">
     <div class="col-12 col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <h5 class="card-title">Gruppenübersicht</h5>
-                    <span class="badge rounded-pill bg-primary">@Model.GroupCount</span>
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title fw-bold" style="color: var(--bs-success-text-emphasis);">Gruppenübersicht</h5>
+                    <span class="badge rounded-pill px-3 py-2" style="background-color: var(--bs-success-text-emphasis);">@Model.GroupCount</span>
                 </div>
-                <p class="card-text">Alle Gruppen mit Teams und Ergebnissen.</p>
-                <a class="btn btn-primary" asp-controller="Home" asp-action="Groups">Zur Übersicht</a>
+                <p class="card-text text-muted small">Alle Gruppen mit Teams und Ergebnissen.</p>
+                <a class="btn-pill-dark mt-auto" asp-controller="Home" asp-action="Groups">Zur Übersicht</a>
             </div>
         </div>
     </div>
+
     <div class="col-12 col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <h5 class="card-title">Spielplan</h5>
-                    <span class="badge rounded-pill bg-primary">@Model.GameCount</span>
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title fw-bold" style="color: var(--bs-success-text-emphasis);">Spielplan</h5>
+                    <span class="badge rounded-pill px-3 py-2" style="background-color: var(--bs-success-text-emphasis);">@Model.GameCount</span>
                 </div>
-                <p class="card-text">Alle Spiele nach Datum sortiert.</p>
-                <a class="btn btn-primary" asp-controller="Home" asp-action="Schedule">Zum Spielplan</a>
+                <p class="card-text text-muted small">Alle Spiele nach Datum sortiert.</p>
+                <a class="btn-pill-dark mt-auto" asp-controller="Home" asp-action="Schedule">Zum Spielplan</a>
             </div>
         </div>
     </div>
+
     <div class="col-12 col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <h5 class="card-title">Tipps & Rankings</h5>
-                    <span class="badge rounded-pill bg-primary">@Model.TippCount</span>
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title fw-bold" style="color: var(--bs-success-text-emphasis);">Tipps & Rankings</h5>
+                    <span class="badge rounded-pill px-3 py-2" style="background-color: var(--bs-success-text-emphasis);">@Model.TippCount</span>
                 </div>
-                <p class="card-text">Aktueller Punktestand aller Teilnehmer.</p>
-                <a class="btn btn-primary" asp-controller="Home" asp-action="Rankings">Zu den Rankings</a>
+                <p class="card-text text-muted small">Aktueller Punktestand aller Teilnehmer.</p>
+                <a class="btn-pill-dark mt-auto" asp-controller="Home" asp-action="Rankings">Zu den Rankings</a>
             </div>
         </div>
     </div>

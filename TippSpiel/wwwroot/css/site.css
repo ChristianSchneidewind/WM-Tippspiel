@@ -29,3 +29,127 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* === WM-Tippspiel: Globaler Rasen-Hintergrund === */
+
+/* 1. Den gesamten Hauptbereich mit Rasen füllen */
+/* In der site.css ergänzen/ersetzen */
+/* Wir sprechen den Container spezifischer an */
+main.container, .main-container-fixed {
+  background: repeating-linear-gradient(
+          135deg,
+          #2c5601 0px,
+          #2c5601 30px,
+          #204001 30px,
+          #204001 60px
+  ) !important;
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.5);
+  min-height: 85vh;
+  margin-top: 25px;
+  margin-bottom: 40px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Falls der Hintergrund weiß blitzt: */
+.container-fluid, .container {
+  background-color: transparent !important;
+}
+
+/* 2. Damit weiße Karten auf dem Rasen perfekt lesbar sind */
+.card {
+  background-color: rgba(255, 255, 255, 0.95); /* Leicht transparentes Weiß */
+  backdrop-filter: blur(5px); /* Moderner Glass-Effekt */
+  border: none;
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Optional: Ein kleiner Hover-Effekt für die Karten */
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* CSS für das Maskottchen-Banner */
+.hero-maskot-container {
+  display: inline-flex;
+  position: relative;
+}
+
+/* Positioniert Text und Button über dem Bild */
+.maskot-overlay {
+  position: absolute;
+  bottom: 25px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 0 15px;
+}
+
+/* Zentrales Design für die dunklen Navigations-Balken */
+.nav-pill-container {
+  background-color: var(--bs-success-text-emphasis) !important;
+  border-radius: 50rem; /* Entspricht rounded-5 */
+  padding: 0.25rem;    /* Entspricht p-1 */
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* shadow-sm */
+  display: flex;
+  gap: 0.5rem;         /* gap-2 */
+
+  /* CSS Variablen für die Links darin */
+  --bs-nav-link-color: rgba(255, 255, 255, 0.85);
+  --bs-nav-pills-link-active-color: var(--bs-success-text-emphasis);
+  --bs-nav-pills-link-active-bg: var(--bs-white);
+}
+
+/* Stil für die Links innerhalb dieses Containers */
+.nav-pill-container .nav-link {
+  font-size: 0.875rem; /* small */
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Optionaler Hover-Effekt */
+.nav-pill-container .nav-link:hover:not(.active) {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Globale Steuerung für Seitenüberschriften */
+.page-title {
+  color: var(--bs-white); /* Macht die Schrift weiß */
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Macht es auf hellem Grund lesbarer */
+  letter-spacing: -0.5px;
+  margin-bottom: 0;
+}
+
+/* Optional: Ein kleiner grüner Balken links neben der Überschrift */
+.page-title-container {
+  border-left: 4px solid var(--bs-danger-text-emphasis);
+  padding-left: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Button im Pill-Style (passend zum Header-Design) */
+.btn-pill-dark {
+  /* Hier nutzen wir deine funktionierende Variable aus dem Header */
+  background-color: var(--bs-success-text-emphasis) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  border-radius: 50rem !important;
+  border: none;
+  padding: 0.4rem 1.2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+}
+
+.btn-pill-dark:hover {
+  color: white !important;
+  /* Ein simpler Trick: Etwas heller durch Deckkraft oder festen Wert */
+  background-color: #0c422a !important;
+  transform: translateY(-1px);
+}
+
