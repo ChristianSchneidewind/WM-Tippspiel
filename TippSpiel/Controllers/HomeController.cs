@@ -1,242 +1,200 @@
 using System.Diagnostics;
-using System.Linq;
-using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TippSpiel.Models;
 using TippSpiel.Data;
 using TippSpiel.Models.ViewModels;
 
-namespace TippSpiel.Controllers
+namespace TippSpiel.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    private readonly ApplicationDbContext _db;
+
+    public HomeController(ApplicationDbContext db)
     {
-        private readonly IGameRepository _repository;
-        private readonly ApplicationDbContext _db;
-
-        public HomeController(IGameRepository repository, ApplicationDbContext db)
-        {
-            _repository = repository;
-            _db = db;
-        }
-
-        public IActionResult Index()
-        {
-            var nextGame = _db.Games
-                .Include(game => game.Group)
-                .AsEnumerable()
-                .OrderBy(game => game.KickOff)
-                .Select(game => new NextGameViewModel
-                {
-                    HomeTeam = game.HomeTeam,
-                    AwayTeam = game.AwayTeam,
-                    GroupName = game.Group != null ? game.Group.Name : string.Empty,
-                    KickOff = game.KickOff
-                })
-                .FirstOrDefault();
-
-            var model = new HomeIndexViewModel
-            {
-                GroupCount = _db.Groups.Count(),
-                GameCount = _db.Games.Count(),
-                TippCount = _db.Tipps.Count(),
-                NextGame = nextGame
-            };
-
-            return View(model);
-        }
-
-        public IActionResult Groups()
-        {
-            var groups = _repository.Groups
-                .Where(group => !string.Equals(group.Name, "Finalrunde", StringComparison.OrdinalIgnoreCase))
-                .OrderBy(group => group.Name)
-                .AsEnumerable()
-                .Select(group =>
-                {
-                    var games = group.Games
-                        .OrderBy(game => game.KickOff)
-                        .ToList();
-
-                    var teams = games
-                        .SelectMany(game => new[] { game.HomeTeam, game.AwayTeam })
-                        .Where(team => !string.IsNullOrWhiteSpace(team))
-                        .Distinct()
-                        .OrderBy(team => team)
-                        .ToList();
-
-                    var standings = teams.ToDictionary(
-                        team => team,
-                        team => new GroupTableRowViewModel
-                        {
-                            TeamName = team
-                        });
-
-                    var finishedGames = games
-                        .Where(game => game.HomeTeamScore.HasValue && game.AwayTeamScore.HasValue)
-                        .ToList();
-
-                    foreach (var game in finishedGames)
-                    {
-                        var homeTeam = game.HomeTeam;
-                        var awayTeam = game.AwayTeam;
-
-                        if (!standings.ContainsKey(homeTeam) || !standings.ContainsKey(awayTeam))
-                        {
-                            continue;
-                        }
-
-                        var home = standings[homeTeam];
-                        var away = standings[awayTeam];
-
-                        var homeGoals = game.HomeTeamScore!.Value;
-                        var awayGoals = game.AwayTeamScore!.Value;
-
-                        home.GamesPlayed++;
-                        away.GamesPlayed++;
-
-                        home.GoalsFor += homeGoals;
-                        home.GoalsAgainst += awayGoals;
-
-                        away.GoalsFor += awayGoals;
-                        away.GoalsAgainst += homeGoals;
-
-                        if (homeGoals > awayGoals)
-                        {
-                            home.Wins++;
-                            away.Losses++;
-                            home.Points += 3;
-                        }
-                        else if (homeGoals < awayGoals)
-                        {
-                            away.Wins++;
-                            home.Losses++;
-                            away.Points += 3;
-                        }
-                        else
-                        {
-                            home.Draws++;
-                            away.Draws++;
-                            home.Points += 1;
-                            away.Points += 1;
-                        }
-                    }
-
-                    var tableRows = standings.Values
-                        .OrderByDescending(row => row.Points)
-                        .ThenByDescending(row => row.GoalDifference)
-                        .ThenByDescending(row => row.GoalsFor)
-                        .ThenBy(row => row.TeamName)
-                        .ToList();
-
-                    for (int i = 0; i < tableRows.Count; i++)
-                    {
-                        tableRows[i].Position = i + 1;
-                    }
-
-                    return new GroupOverviewViewModel
-                    {
-                        GroupId = group.Id,
-                        GroupName = group.Name,
-                        Teams = teams,
-                        Games = games,
-                        TableRows = tableRows
-                    };
-                })
-                .ToList();
-
-            return View(groups);
-        }
-
-        public IActionResult Finals()
-        {
-            var finalStageGames = _repository.Games
-                .Where(game => game.Group != null && string.Equals(game.Group.Name, "Finalrunde", StringComparison.OrdinalIgnoreCase))
-                .AsEnumerable()
-                .OrderBy(game => game.MatchNumber ?? int.MaxValue)
-                .ThenBy(game => game.KickOff)
-                .ToList();
-
-            var rounds = new List<KnockoutRoundViewModel>
-            {
-                BuildRound("Sechzehntelfinale", finalStageGames, 73, 88),
-                BuildRound("Achtelfinale", finalStageGames, 89, 96),
-                BuildRound("Viertelfinale", finalStageGames, 97, 100),
-                BuildRound("Halbfinale", finalStageGames, 101, 102),
-                BuildRound("Spiel um Platz 3", finalStageGames, 103, 103),
-                BuildRound("Finale", finalStageGames, 104, 104)
-            };
-
-            var model = new FinalsViewModel
-            {
-                Rounds = rounds.Where(round => round.Games.Count > 0).ToList()
-            };
-
-            return View(model);
-        }
-
-        private static KnockoutRoundViewModel BuildRound(string name, List<Game> games, int start, int end)
-        {
-            var roundGames = games
-                .Where(game => game.MatchNumber.HasValue && game.MatchNumber.Value >= start && game.MatchNumber.Value <= end)
-                .OrderBy(game => game.MatchNumber)
-                .ThenBy(game => game.KickOff)
-                .ToList();
-
-            return new KnockoutRoundViewModel
-            {
-                Name = name,
-                Games = roundGames
-            };
-        }
-
-        public IActionResult Schedule()
-        {
-            var model = new ScheduleViewModel
-            {
-                Games = _repository.Games
-                    .AsEnumerable()
-                    .OrderBy(game => game.KickOff)
-                    .ToList()
-            };
-
-            return View(model);
-        }
-
-        public IActionResult Rankings()
-        {
-            var entries = _db.Users
-                .Select(user => new RankingEntryViewModel
-                {
-                    UserId = user.Id,
-                    UserName = user.UserName ?? user.Email ?? "Unbekannt",
-                    Points = _db.Tipps
-                        .Where(tipp => tipp.UserId == user.Id)
-                        .Sum(tipp => (int?)tipp.points) ?? 0
-                })
-                .OrderByDescending(entry => entry.Points)
-                .ThenBy(entry => entry.UserName)
-                .ToList();
-
-            return View(new RankingsViewModel
-            {
-                Entries = entries
-            });
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel
-            {
-                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
-            });
-        }
+        _db = db;
     }
+
+    // --- STARTSEITE ---
+    public async Task<IActionResult> Index()
+    {
+        var now = DateTimeOffset.Now;
+        var allGames = await _db.Games.Include(g => g.Group).ToListAsync();
+
+        var upcomingGames = allGames
+            .Where(g => g.KickOff > now)
+            .OrderBy(g => g.KickOff)
+            .Take(3)
+            .Select(game => new UpcomingGameViewModel
+            {
+                Id = game.Id,
+                HomeTeam = FixTeamName(game.HomeTeam),
+                AwayTeam = FixTeamName(game.AwayTeam),
+                GroupName = game.Group?.Name ?? "Unbekannt",
+                KickOff = game.KickOff
+            })
+            .ToList();
+
+        return View(new HomeIndexViewModel
+        {
+            UpcomingGames = upcomingGames,
+            GroupCount = await _db.Groups.CountAsync(),
+            GameCount = allGames.Count,
+            TippCount = await _db.Tipps.CountAsync()
+        });
+    }
+
+    // --- GRUPPENÜBERSICHT & TABELLEN ---
+    public async Task<IActionResult> Groups()
+    {
+        var groupsData = await _db.Groups.Include(g => g.Games).ToListAsync();
+
+        // Namen global für diese Anfrage waschen
+        foreach (var group in groupsData)
+        {
+            foreach (var game in group.Games)
+            {
+                game.HomeTeam = FixTeamName(game.HomeTeam);
+                game.AwayTeam = FixTeamName(game.AwayTeam);
+            }
+        }
+
+        var groupsVm = groupsData
+            .Where(g => !g.Name.Equals("Finalrunde", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(g => g.Name)
+            .Select(g => new GroupOverviewViewModel
+            {
+                GroupId = g.Id,
+                GroupName = g.Name,
+                Teams = g.Games
+                    .SelectMany(x => new[] { x.HomeTeam, x.AwayTeam })
+                    .Distinct()
+                    .Where(t => !string.IsNullOrEmpty(t))
+                    .OrderBy(t => t)
+                    .ToList(),
+                Games = g.Games.OrderBy(x => x.KickOff).ToList()
+            })
+            .ToList();
+
+        foreach (var groupVm in groupsVm)
+        {
+            CalculateTable(groupVm);
+        }
+
+        return View(groupsVm);
+    }
+
+    // --- FINALRUNDE ---
+    public async Task<IActionResult> Finals()
+    {
+        var allGames = await _db.Games.Include(g => g.Group).ToListAsync();
+
+        foreach (var game in allGames)
+        {
+            game.HomeTeam = FixTeamName(game.HomeTeam);
+            game.AwayTeam = FixTeamName(game.AwayTeam);
+        }
+
+        var finalGames = allGames
+            .Where(g => g.Group != null && g.Group.Name.Equals("Finalrunde", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(g => g.MatchNumber ?? 999)
+            .ToList();
+
+        var model = new FinalsViewModel
+        {
+            Rounds = new List<KnockoutRoundViewModel>
+            {
+                new() { Name = "Sechzehntelfinale", Games = finalGames.Where(g => g.MatchNumber is >= 73 and <= 88).ToList() },
+                new() { Name = "Achtelfinale", Games = finalGames.Where(g => g.MatchNumber is >= 89 and <= 96).ToList() },
+                new() { Name = "Viertelfinale", Games = finalGames.Where(g => g.MatchNumber is >= 97 and <= 100).ToList() },
+                new() { Name = "Halbfinale", Games = finalGames.Where(g => g.MatchNumber is >= 101 and <= 102).ToList() },
+                new() { Name = "Spiel um Platz 3", Games = finalGames.Where(g => g.MatchNumber == 103).ToList() },
+                new() { Name = "Finale", Games = finalGames.Where(g => g.MatchNumber == 104).ToList() }
+            }.Where(r => r.Games.Any()).ToList()
+        };
+
+        return View(model);
+    }
+
+    // --- SPIELPLAN ---
+    public async Task<IActionResult> Schedule()
+    {
+        var gamesFromDb = await _db.Games.Include(g => g.Group).ToListAsync();
+
+        foreach (var game in gamesFromDb)
+        {
+            game.HomeTeam = FixTeamName(game.HomeTeam);
+            game.AwayTeam = FixTeamName(game.AwayTeam);
+        }
+
+        var sortedGames = gamesFromDb.OrderBy(g => g.KickOff).ToList();
+        return View(new ScheduleViewModel { Games = sortedGames });
+    }
+
+    // --- RANGLISTE ---
+    public async Task<IActionResult> Rankings()
+    {
+        var entries = await _db.Users
+            .Select(u => new RankingEntryViewModel
+            {
+                UserId = u.Id,
+                UserName = u.UserName ?? "Anonym",
+                Points = _db.Tipps.Where(t => t.UserId == u.Id).Sum(t => (int?)t.points) ?? 0
+            })
+            .OrderByDescending(e => e.Points)
+            .ToListAsync();
+
+        return View(new RankingsViewModel { Entries = entries });
+    }
+
+    // --- HILFSMETHODEN ---
+
+    private static void CalculateTable(GroupOverviewViewModel groupVm)
+    {
+        var rows = groupVm.Teams.Select(name => new TableRowViewModel { TeamName = name }).ToList();
+
+        foreach (var game in groupVm.Games.Where(g => g.HomeTeamScore.HasValue && g.AwayTeamScore.HasValue))
+        {
+            var home = rows.FirstOrDefault(r => r.TeamName == game.HomeTeam);
+            var away = rows.FirstOrDefault(r => r.TeamName == game.AwayTeam);
+
+            if (home != null && away != null)
+            {
+                home.GamesPlayed++; away.GamesPlayed++;
+                home.GoalsFor += game.HomeTeamScore!.Value; home.GoalsAgainst += game.AwayTeamScore!.Value;
+                away.GoalsFor += game.AwayTeamScore!.Value; away.GoalsAgainst += game.HomeTeamScore!.Value;
+
+                if (game.HomeTeamScore > game.AwayTeamScore) { home.Wins++; home.Points += 3; away.Losses++; }
+                else if (game.HomeTeamScore < game.AwayTeamScore) { away.Wins++; away.Points += 3; home.Losses++; }
+                else { home.Draws++; away.Draws++; home.Points += 1; away.Points += 1; }
+            }
+        }
+
+        groupVm.TableRows = rows
+            .OrderByDescending(r => r.Points)
+            .ThenByDescending(r => r.GoalDifference)
+            .ThenByDescending(r => r.GoalsFor)
+            .ToList();
+
+        for (int i = 0; i < groupVm.TableRows.Count; i++) groupVm.TableRows[i].Position = i + 1;
+    }
+
+    private string FixTeamName(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return name;
+        return name.Trim() switch
+        {
+            "Saudiarabien" => "Saudi-Arabien",
+            "IR Iran" => "Iran",
+            "Curacao" => "Curaçao",
+            "Republik Korea" => "Südkorea",
+            _ => name
+        };
+    }
+
+    public IActionResult Privacy() => View();
+
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 }

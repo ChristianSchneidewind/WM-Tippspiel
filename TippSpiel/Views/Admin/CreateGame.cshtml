@@ -1,38 +1,110 @@
+@using TippSpiel.Helpers
 @model TippSpiel.Models.Admin.AdminGameEditViewModel
 
 @{
     ViewData["Title"] = "Spiel anlegen";
 }
 
-<h1>Spiel anlegen</h1>
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0" style="border-radius: 1rem; overflow: hidden;">
+            
+            <div class="card-header border-0 text-white py-3"
+                 style="background-color: var(--bs-success-text-emphasis);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-plus-circle-fill fs-4"></i>
+                    <h2 class="h5 mb-0">Neues Spiel anlegen</h2>
+                </div>
+            </div>
 
-<form asp-action="CreateGame" method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="card-body p-4">
+                <form asp-action="CreateGame" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-    <div class="mb-3">
-        <label asp-for="HomeTeam" class="form-label"></label>
-        <input asp-for="HomeTeam" class="form-control" />
-        <span asp-validation-for="HomeTeam" class="text-danger"></span>
+                    <div class="row g-3 mb-4">
+                        @* Heimteam *@
+                        <div class="col-sm-6">
+                            <label asp-for="HomeTeam" class="form-label fw-bold small text-muted text-uppercase">Heimteam</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><span id="homeFlag" class="fi fi-un"></span></span>
+                                <input asp-for="HomeTeam" class="form-control" placeholder="z.B. Deutschland" oninput="updateFlag('home')" id="homeInput" />
+                            </div>
+                            <span asp-validation-for="HomeTeam" class="text-danger small"></span>
+                        </div>
+
+                        @* Gastteam *@
+                        <div class="col-sm-6">
+                            <label asp-for="AwayTeam" class="form-label fw-bold small text-muted text-uppercase">Gastteam</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><span id="awayFlag" class="fi fi-un"></span></span>
+                                <input asp-for="AwayTeam" class="form-control" placeholder="z.B. Mexiko" oninput="updateFlag('away')" id="awayInput" />
+                            </div>
+                            <span asp-validation-for="AwayTeam" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        @* Kickoff *@
+                        <div class="col-sm-7">
+                            <label asp-for="KickOff" class="form-label fw-bold small text-muted text-uppercase">Anstoßzeit</label>
+                            <input asp-for="KickOff" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="KickOff" class="text-danger small"></span>
+                        </div>
+
+                        @* Gruppe *@
+                        <div class="col-sm-5">
+                            <label asp-for="GroupId" class="form-label fw-bold small text-muted text-uppercase">Gruppe</label>
+                            <select asp-for="GroupId" asp-items="ViewBag.Groups" class="form-select"></select>
+                            <span asp-validation-for="GroupId" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted opacity-25">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-action="Index" class="btn btn-link text-muted text-decoration-none">
+                            <i class="bi bi-arrow-left"></i> Zurück zur Liste
+                        </a>
+                        <button type="submit" class="btn px-4 text-white"
+                                style="background-color: var(--bs-success-text-emphasis);">
+                            <i class="bi bi-check-lg me-1"></i> Spiel speichern
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
+</div>
 
-    <div class="mb-3">
-        <label asp-for="AwayTeam" class="form-label"></label>
-        <input asp-for="AwayTeam" class="form-control" />
-        <span asp-validation-for="AwayTeam" class="text-danger"></span>
-    </div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // Eine kleine JS-Variante deines FlagHelpers für die Echtzeit-Vorschau
+        function getFlagClass(name) {
+            const n = name.trim();
+            if (!n) return "fi-un";
+            
+            // Mapping für die wichtigsten Teams (verkürzt für Vorschau)
+            const map = {
+                "Deutschland": "fi-de", "GER": "fi-de",
+                "Mexiko": "fi-mx", "MEX": "fi-mx",
+                "USA": "fi-us",
+                "Kanada": "fi-ca", "CAN": "fi-ca",
+                "Österreich": "fi-at", "AUT": "fi-at",
+                "Schweiz": "fi-ch", "SUI": "fi-ch"
+            };
+            
+            return map[n] || "fi-xx";
+        }
 
-    <div class="mb-3">
-        <label asp-for="KickOff" class="form-label"></label>
-        <input asp-for="KickOff" class="form-control" type="datetime-local" />
-        <span asp-validation-for="KickOff" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="GroupId" class="form-label"></label>
-        <select asp-for="GroupId" asp-items="ViewBag.Groups" class="form-select"></select>
-        <span asp-validation-for="GroupId" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Speichern</button>
-    <a asp-action="Index" class="btn btn-link">Zurück</a>
-</form>
+        function updateFlag(side) {
+            const input = document.getElementById(side + 'Input').value;
+            const flagSpan = document.getElementById(side + 'Flag');
+            
+            // Wir nutzen hier einfachheitshalber die Logik, die du im Helper hast.
+            // Wenn es perfekt sein soll, müsste man das Mapping hier spiegeln.
+            flagSpan.className = 'fi ' + getFlagClass(input);
+        }
+    </script>
+}

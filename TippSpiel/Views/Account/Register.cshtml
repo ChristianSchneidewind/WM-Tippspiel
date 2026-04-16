@@ -3,46 +3,78 @@
     ViewData["Title"] = "Registrierung";
 }
 
-<h1 class="display-6 mb-4">Registrierung</h1>
+<div class="row justify-content-center mt-5 mb-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0" style="border-radius: 1rem; overflow: hidden;">
+            
+            @* Header ohne Icon-Abhängigkeit *@
+            <div class="card-header border-0 text-white text-center py-4"
+                 style="background-color: var(--bs-success-text-emphasis);">
+                <h2 class="h4 mb-0">Konto erstellen</h2>
+            </div>
+            
+            <div class="card-body p-4">
+                <form asp-action="Register" method="post">
+                    <input type="hidden" asp-for="ReturnUrl" />
+                    
+                    @* Benutzername - Puristisches Feld *@
+                    <div class="mb-3">
+                        <label asp-for="UserName" class="form-label fw-bold small text-muted text-uppercase">Benutzername</label>
+                        <input asp-for="UserName" class="form-control" placeholder="Wähle einen Namen" />
+                        <span asp-validation-for="UserName" class="text-danger small"></span>
+                    </div>
 
-<form asp-action="Register" method="post" class="card shadow-sm">
-    <div class="card-body">
-        <input type="hidden" asp-for="ReturnUrl" />
-        <div class="mb-3">
-            <label asp-for="UserName" class="form-label"></label>
-            <input asp-for="UserName" class="form-control" />
-            <span asp-validation-for="UserName" class="text-danger"></span>
+                    @* E-Mail *@
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-bold small text-muted text-uppercase">E-Mail Adresse</label>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="beispiel@mail.de" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    @* Passwort *@
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-bold small text-muted text-uppercase">Passwort</label>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    @* Passwort Bestätigung *@
+                    <div class="mb-4">
+                        <label asp-for="ConfirmPassword" class="form-label fw-bold small text-muted text-uppercase">Passwort bestätigen</label>
+                        <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="••••••••" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    </div>
+
+                    @* Admin-Bereich *@
+                    <div class="p-3 bg-light rounded-3 mb-4">
+                        <div class="form-check mb-2">
+                            <input asp-for="IsAdmin" class="form-check-input" />
+                            <label asp-for="IsAdmin" class="form-check-label small fw-bold text-muted">Als Admin registrieren?</label>
+                        </div>
+                        <div class="admin-code-section">
+                            <label asp-for="AdminCode" class="form-label small text-muted mb-1 text-uppercase">Admin-Code</label>
+                            <input asp-for="AdminCode" class="form-control" placeholder="Sicherheits-Code" />
+                            <div class="form-text" style="font-size: 0.7rem;">Code aus <code>ADMIN__REGISTRATIONCODE</code></div>
+                            <span asp-validation-for="AdminCode" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="text-danger small mb-3" asp-validation-summary="ModelOnly"></div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-lg text-white shadow-sm"
+                                style="background-color: var(--bs-success-text-emphasis); border-radius: 0.5rem;">
+                            Registrierung abschließen
+                        </button>
+                        <a asp-action="Login" class="btn btn-link btn-sm text-muted text-decoration-none">
+                            Bereits Mitglied? Zum Login
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="mb-3">
-            <label asp-for="Email" class="form-label"></label>
-            <input asp-for="Email" class="form-control" />
-            <span asp-validation-for="Email" class="text-danger"></span>
-        </div>
-        <div class="mb-3">
-            <label asp-for="Password" class="form-label"></label>
-            <input asp-for="Password" class="form-control" />
-            <span asp-validation-for="Password" class="text-danger"></span>
-        </div>
-        <div class="mb-3">
-            <label asp-for="ConfirmPassword" class="form-label"></label>
-            <input asp-for="ConfirmPassword" class="form-control" />
-            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-        </div>
-        <div class="form-check mb-3">
-            <input asp-for="IsAdmin" class="form-check-input" />
-            <label asp-for="IsAdmin" class="form-check-label"></label>
-        </div>
-        <div class="mb-3">
-            <label asp-for="AdminCode" class="form-label"></label>
-            <input asp-for="AdminCode" class="form-control" />
-            <div class="form-text">Admin-Code kommt aus der Umgebungsvariable <code>ADMIN__REGISTRATIONCODE</code>.</div>
-            <span asp-validation-for="AdminCode" class="text-danger"></span>
-        </div>
-        <div class="text-danger" asp-validation-summary="ModelOnly"></div>
-        <button type="submit" class="btn btn-primary">Registrieren</button>
-        <a asp-action="Login" class="btn btn-link">Zum Login</a>
     </div>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

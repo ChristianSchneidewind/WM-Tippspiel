@@ -20,8 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\Images\2026_FIFA_World_Cup.svg" />
-    <None Include="wwwroot\Images\FIFA_World_Cup_2026_Mascot.webp" />
+    <Folder Include="wwwroot\Images\" />
   </ItemGroup>
 
 </Project>

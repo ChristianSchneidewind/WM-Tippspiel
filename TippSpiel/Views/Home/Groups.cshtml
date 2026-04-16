@@ -1,102 +1,156 @@
+@using TippSpiel.Helpers
 @model IReadOnlyList<TippSpiel.Models.ViewModels.GroupOverviewViewModel>
-
 @{
     ViewData["Title"] = "Gruppenübersicht";
 }
 
-<h1>Gruppenübersicht</h1>
+<div class="d-flex justify-content-between align-items-center mb-4 page-title-container">
+    <h1 class="display-6 page-title">Gruppenübersicht</h1>
+</div>
 
 @if (Model.Count == 0)
 {
-    <p>Noch keine Gruppen vorhanden.</p>
+    <div class="card bg-light border-0 shadow-sm">
+        <div class="card-body text-center text-muted">Noch keine Gruppen vorhanden.</div>
+    </div>
 }
 else
 {
-    @foreach (var group in Model)
-    {
-        <section class="mb-5">
-            <h2>Gruppe @group.GroupName</h2>
+    <div class="row g-4">
+        @foreach (var group in Model)
+        {
+            <div class="col-12 col-lg-6">
+                <div class="card shadow-sm border-0 overflow-hidden" style="border-radius: 1rem;">
+                    
+                    <div class="card-header border-0 text-white d-flex justify-content-between align-items-center py-3"
+                         style="background-color: var(--bs-success-text-emphasis);">
+                        <strong class="fs-5">Gruppe @group.GroupName</strong>
+                        <i class="bi bi-trophy"></i>
+                    </div>
+                    
+                    <div class="card-body">
+                        
+                        <div class="mb-4">
+                            <div class="fw-bold mb-2 small text-uppercase tracking-wider" style="color: var(--bs-success-text-emphasis);">Teilnehmer</div>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var team in group.Teams)
+                                {
+                                    <span class="badge rounded-pill px-3 py-2 fw-medium"
+                                          style="background-color: var(--bs-success-text-emphasis); font-size: 0.85rem;">
+                                        <span class="fi @FlagHelper.GetFlagClass(team) me-1"></span> @team
+                                    </span>
+                                }
+                            </div>
+                        </div>
 
-            <h3>Tabelle</h3>
-            @if (group.TableRows.Count > 0)
-            {
-                <table class="table table-striped table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Platz</th>
-                            <th>Team</th>
-                            <th>Sp</th>
-                            <th>W</th>
-                            <th>D</th>
-                            <th>L</th>
-                            <th>Tore</th>
-                            <th>Diff</th>
-                            <th>Pkt</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var row in group.TableRows)
-                        {
-                            var highlightClass = row.Position <= 2 ? "table-success" : "";
+                        <div class="mb-4">
+                            <div class="fw-bold mb-2 small text-uppercase tracking-wider" style="color: var(--bs-success-text-emphasis);">Tabelle</div>
+                            @if (group.TableRows != null && group.TableRows.Count > 0)
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr style="font-size: 0.75rem; color: #666;">
+                                                <th class="border-0">#</th>
+                                                <th class="border-0">TEAM</th>
+                                                <th class="border-0 text-center">SP</th>
+                                                <th class="border-0 text-center">TORE</th>
+                                                <th class="border-0 text-center">DIFF</th>
+                                                <th class="border-0 text-center">PKT</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="font-size: 0.85rem;">
+                                            @foreach (var row in group.TableRows.OrderBy(r => r.Position))
+                                            {
+                                                var highlightClass = row.Position <= 2 ? "table-success" : "";
+                                                <tr class="@highlightClass">
+                                                    <td class="fw-bold">@row.Position</td>
+                                                    <td class="fw-semibold">
+                                                        <span class="fi @FlagHelper.GetFlagClass(row.TeamName) me-1"></span> @row.TeamName
+                                                    </td>
+                                                    <td class="text-center">@row.GamesPlayed</td>
+                                                    <td class="text-center text-muted" style="font-size: 0.8rem;">@row.GoalsFor:@row.GoalsAgainst</td>
+                                                    <td class="text-center">@(row.GoalDifference > 0 ? "+" : "")@row.GoalDifference</td>
+                                                    <td class="text-center fw-bold" style="color: var(--bs-success-text-emphasis);">@row.Points</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-light border-0 small py-2">Berechnung der Tabelle läuft...</div>
+                            }
+                        </div>
 
-                            <tr class="@highlightClass">
-                                <td>@row.Position</td>
-                                <td>@row.TeamName</td>
-                                <td>@row.GamesPlayed</td>
-                                <td>@row.Wins</td>
-                                <td>@row.Draws</td>
-                                <td>@row.Losses</td>
-                                <td>@row.GoalsFor:@row.GoalsAgainst</td>
-                                <td>@row.GoalDifference</td>
-                                <td>@row.Points</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <p>Keine Tabelle verfügbar.</p>
-            }
+                        <div>
+                            <div class="fw-bold mb-2 small text-uppercase tracking-wider" style="color: var(--bs-success-text-emphasis);">Spiele</div>
+                            @if (group.Games.Count > 0)
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr style="font-size: 0.75rem; color: #666;">
+                                                <th class="border-0 ps-3" style="width: 60px;">MATCH</th>
+                                                <th class="border-0" style="width: 130px;">KICKOFF</th>
+                                                <th class="border-0 text-center">PARTIE</th>
+                                                <th class="border-0 text-center" style="width: 100px;">ERGEBNIS</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="font-size: 0.85rem;">
+                                            @foreach (var game in group.Games)
+                                            {
+                                                <tr>
+                                                    @* 1. NEU: MATCH-Spalte *@
+                                                    <td class="ps-3 fw-bold text-muted" style="font-size: 0.75rem;">
+                                                        #@(game.MatchNumber?.ToString() ?? "-")
+                                                    </td>
 
-            <h3>Spiele</h3>
-            @if (group.Games.Count > 0)
-            {
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Kickoff</th>
-                            <th>Heim</th>
-                            <th>Gast</th>
-                            <th>Ergebnis</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var game in group.Games)
-                        {
-                            <tr>
-                                <td>@(game.KickOff == default ? "-" : game.KickOff.ToLocalTime().ToString("dd.MM.yyyy HH:mm"))</td>
-                                <td>@game.HomeTeam</td>
-                                <td>@game.AwayTeam</td>
-                                <td>
-                                    @if (game.HomeTeamScore.HasValue && game.AwayTeamScore.HasValue)
-                                    {
-                                        @($"{game.HomeTeamScore}:{game.AwayTeamScore}")
-                                    }
-                                    else
-                                    {
-                                        @:-
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <p>Keine Spiele eingetragen.</p>
-            }
-        </section>
-    }
+                                                    @* 2. KICKOFF (angepasst für besseren Look) *@
+                                                    <td style="font-size: 0.75rem;">
+                                                        <div>@(game.KickOff == default ? "-" : game.KickOff.ToLocalTime().ToString("dd.MM.yyyy"))</div>
+                                                        <div class="text-muted small">@(game.KickOff == default ? "" : game.KickOff.ToLocalTime().ToString("HH:mm")) Uhr</div>
+                                                    </td>
+
+                                                    @* 3. PARTIE (Zentriert wie im Spielplan) *@
+                                                    <td>
+                                                        <div class="d-flex align-items-center justify-content-center gap-2">
+                                                            <div class="d-flex align-items-center gap-1 flex-grow-1 justify-content-end text-end">
+                                                                <span class="fw-semibold">@game.HomeTeam</span>
+                                                                <span class="fi @FlagHelper.GetFlagClass(game.HomeTeam)"></span>
+                                                            </div>
+                                                            <span class="text-muted small">vs.</span>
+                                                            <div class="d-flex align-items-center gap-1 flex-grow-1">
+                                                                <span class="fi @FlagHelper.GetFlagClass(game.AwayTeam)"></span>
+                                                                <span class="fw-semibold">@game.AwayTeam</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+
+                                                    @* 4. ERGEBNIS *@
+                                                    <td class="text-center">
+                                                        @if (game.HomeTeamScore.HasValue)
+                                                        {
+                                                            <span class="badge bg-light text-dark border fw-bold px-2 py-1">
+                                                                @game.HomeTeamScore : @game.AwayTeamScore
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted small">- : -</span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 }

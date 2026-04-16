@@ -1,3 +1,4 @@
+@using TippSpiel.Helpers
 @model TippSpiel.Models.ViewModels.ScheduleViewModel
 @{
     ViewData["Title"] = "Spielplan";
@@ -5,47 +6,111 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4 page-title-container">
     <h1 class="display-6 page-title">Spielplan</h1>
-    
 </div>
 
 @if (Model.Games.Count == 0)
 {
-    <div class="alert alert-info">Noch keine Spiele vorhanden.</div>
+    <div class="card bg-light border-0 shadow-sm">
+        <div class="card-body text-center text-muted">Noch keine Spiele im Spielplan vorhanden.</div>
+    </div>
 }
 else
 {
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead>
-                <tr>
-                    <th>Datum</th>
-                    <th>Gruppe</th>
-                    <th>Heim</th>
-                    <th>Gast</th>
-                    <th class="text-center">Ergebnis</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var game in Model.Games)
-                {
-                    <tr>
-                        <td>@(game.KickOff == default ? "-" : game.KickOff.ToLocalTime().ToString("dd.MM.yyyy HH:mm"))</td>
-                        <td>@game.Group?.Name</td>
-                        <td>@game.HomeTeam</td>
-                        <td>@game.AwayTeam</td>
-                        <td class="text-center">
-                            @if (game.HomeTeamScore.HasValue && game.AwayTeamScore.HasValue)
-                            {
-                                <span>@game.HomeTeamScore : @game.AwayTeamScore</span>
-                            }
-                            else
-                            {
-                                <span class="text-muted">-</span>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    <div class="card shadow-sm border-0 overflow-hidden" style="border-radius: 1rem;">
+        @* Header-Bereich wie bei der Finals-Card (Optional, falls du einen grünen Balken oben willst) *@
+        <div class="card-header border-0 text-white py-3"
+             style="background-color: var(--bs-success-text-emphasis);">
+            <strong class="fs-5">Gruppenphase</strong>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr style="font-size: 0.8rem; color: #666;">
+                            <th class="ps-4" style="width: 10%;">MATCH</th>
+                            <th style="width: 15%;">KICKOFF</th>
+                            <th style="width: 10%;">RUNDE</th> @* Hier steht im Spielplan die Gruppe/Runde *@
+                            <th class="text-center" style="width: 50%;">PARTIE</th>
+                            <th class="text-center" style="width: 15%;">ERGEBNIS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var game in Model.Games.OrderBy(g => g.KickOff))
+                        {
+                            <tr>
+                                @* 1. MATCH *@
+                                <td class="ps-4 fw-bold text-muted" style="width: 10%;">
+                                    #@(game.MatchNumber?.ToString() ?? "-")
+                                </td>
+
+                                @* 2. KICKOFF *@
+                                <td style="width: 15%; font-size: 0.85rem;">
+                                    <div>@(game.KickOff == default ? "-" : game.KickOff.ToLocalTime().ToString("dd.MM.yyyy"))</div>
+                                    <div class="text-muted small">@(game.KickOff == default ? "" : game.KickOff.ToLocalTime().ToString("HH:mm")) Uhr</div>
+                                </td>
+
+                                @* 3. RUNDE / GRUPPE *@
+                                <td style="width: 10%;">
+                                    @{
+                                        string rundeName = game.Group?.Name ?? "-";
+                                        string badgeClass = "bg-light text-dark border"; // Standard-Stil für Gruppen A, B, C...
+
+                                        // Wenn es die Finalrunde ist, bestimmen wir die Phase anhand der Match-Nummer
+                                        if (rundeName.Equals("Finalrunde", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            badgeClass = "bg-light text-dark border";
+            
+                                            rundeName = game.MatchNumber switch
+                                            {
+                                                >= 73 and <= 88 => "1/16",
+                                                >= 89 and <= 96 => "1/8",
+                                                >= 97 and <= 100 => "1/4",
+                                                >= 101 and <= 102 => "1/2",
+                                                103 => "Platz 3",
+                                                104 => "FINALE",
+                                                _ => "Finals"
+                                            };
+                                        }
+                                    }
+                                    <span class="badge @badgeClass px-2 py-1" style="min-width: 45px; text-align: center; font-size: 0.75rem;">
+                                        @rundeName
+                                    </span>
+                                </td>
+
+                                @* 4. PARTIE (Jetzt identisch zur Finalrunde) *@
+                                <td style="width: 50%;">
+                                    <div class="d-flex align-items-center">
+                                        <div class="team-container-left">
+                                            <span class="fw-semibold">@game.HomeTeam</span>
+                                            <span class="fi @FlagHelper.GetFlagClass(game.HomeTeam) shadow-sm"></span>
+                                        </div>
+                                        <div class="vs-divider">vs.</div>
+                                        <div class="team-container-right">
+                                            <span class="fi @FlagHelper.GetFlagClass(game.AwayTeam) shadow-sm"></span>
+                                            <span class="fw-semibold">@game.AwayTeam</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                @* 5. ERGEBNIS *@
+                                <td class="text-center" style="width: 15%;">
+                                    @if (game.HomeTeamScore.HasValue && game.AwayTeamScore.HasValue)
+                                    {
+                                        <span class="badge bg-dark px-3 py-2" style="font-family: monospace; font-size: 0.9rem;">
+                                            @game.HomeTeamScore : @game.AwayTeamScore
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-muted border px-3 py-2">- : -</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 }

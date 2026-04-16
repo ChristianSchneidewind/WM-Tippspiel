@@ -1,3 +1,4 @@
+@using TippSpiel.Helpers
 @model TippSpiel.Models.ViewModels.FinalsViewModel
 @{
     ViewData["Title"] = "Finalrunde";
@@ -5,55 +6,87 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4 page-title-container">
     <h1 class="display-6 page-title">Finalrunde</h1>
-    
 </div>
 
 @if (Model.Rounds.Count == 0)
 {
-    <div class="alert alert-info">Noch keine Finalrunden-Spiele vorhanden.</div>
+    <div class="card bg-light border-0 shadow-sm">
+        <div class="card-body text-center text-muted">Noch keine Finalrunden-Spiele vorhanden.</div>
+    </div>
 }
 else
 {
-    <div class="d-flex flex-column gap-4">
+    <div class="d-flex flex-column gap-5">
         @foreach (var round in Model.Rounds)
         {
-            <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                    <strong>@round.Name</strong>
+            <div class="card shadow-sm border-0 overflow-hidden" style="border-radius: 1rem;">
+                <div class="card-header border-0 text-white py-3"
+                     style="background-color: var(--bs-success-text-emphasis);">
+                    <strong class="fs-5">@round.Name</strong>
                 </div>
-                <div class="card-body">
+                
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-sm align-middle">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Kickoff</th>
-                                    <th>Heim</th>
-                                    <th>Gast</th>
-                                    <th class="text-center">Ergebnis</th>
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr style="font-size: 0.8rem; color: #666;">
+                                    <th class="ps-4" style="width: 10%;">MATCH</th>
+                                    <th style="width: 15%;">KICKOFF</th>
+                                    <th style="width: 10%;"></th> @* Platzhalter, damit PARTIE an der gleichen Stelle startet *@
+                                    <th class="text-center" style="width: 50%;">PARTIE</th>
+                                    <th class="text-center" style="width: 15%;">ERGEBNIS</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var game in round.Games)
                                 {
                                     <tr>
-                                        <td>@(game.MatchNumber?.ToString() ?? "-")</td>
-                                        <td>@(game.KickOff == default ? "-" : game.KickOff.ToLocalTime().ToString("dd.MM.yyyy HH:mm"))</td>
-                                        <td>@game.HomeTeam</td>
-                                        <td>@game.AwayTeam</td>
-                                        <td class="text-center">
+                                        @* 1. MATCH (10%) *@
+                                        <td class="ps-4 fw-bold text-muted" style="width: 10%;">
+                                            #@(game.MatchNumber?.ToString() ?? "-")
+                                        </td>
+
+                                        @* 2. KICKOFF (15%) *@
+                                        <td style="width: 15%; font-size: 0.85rem;">
+                                            <div>@(game.KickOff == default ? "-" : game.KickOff.ToLocalTime().ToString("dd.MM.yyyy"))</div>
+                                            <div class="text-muted small">@(game.KickOff == default ? "" : game.KickOff.ToLocalTime().ToString("HH:mm")) Uhr</div>
+                                        </td>
+
+                                        @* 3. PLATZHALTER (10%) - Wichtig für die Symmetrie zum Spielplan *@
+                                        <td style="width: 10%;"></td>
+
+                                        @* 4. PARTIE (50%) - Jetzt mit den neuen Symmetrie-Klassen *@
+                                        <td style="width: 50%;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="team-container-left">
+                                                    <span class="fw-semibold">@game.HomeTeam</span>
+                                                    <span class="fi @FlagHelper.GetFlagClass(game.HomeTeam) shadow-sm"></span>
+                                                </div>
+                                                <div class="vs-divider">vs.</div>
+                                                <div class="team-container-right">
+                                                    <span class="fi @FlagHelper.GetFlagClass(game.AwayTeam) shadow-sm"></span>
+                                                    <span class="fw-semibold">@game.AwayTeam</span>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        @* 5. ERGEBNIS (15%) *@
+                                        <td class="text-center" style="width: 15%;">
                                             @if (game.HomeTeamScore.HasValue && game.AwayTeamScore.HasValue)
                                             {
-                                                <span>@game.HomeTeamScore : @game.AwayTeamScore</span>
+                                                <span class="badge bg-dark px-3 py-2" style="font-family: monospace; font-size: 0.9rem;">
+                                                    @game.HomeTeamScore : @game.AwayTeamScore
+                                                </span>
                                             }
                                             else
                                             {
-                                                <span class="text-muted">-</span>
+                                                <span class="badge bg-light text-muted border px-3 py-2">- : -</span>
                                             }
                                         </td>
                                     </tr>
                                 }
                             </tbody>
+
                         </table>
                     </div>
                 </div>

@@ -1,84 +1,127 @@
 @model TippSpiel.Models.ViewModels.HomeIndexViewModel
+@using TippSpiel.Helpers
 @{
     ViewData["Title"] = "Start";
 }
 
-<div class="text-center mb-5">
-    <div class="hero-maskot-container shadow-lg">
+@* --- HERO BEREICH (LOGO & HAUPT-BUTTON) --- *@
+<div class="text-center mb-5 mt-5">
+    <div class="hero-floating-container mx-auto">
         
-        <img src="/images/FIFA_World_Cup_2026_Mascot.webp" 
-             alt="WM Maskottchen" 
-             class="img-fluid"
-             style="max-height: 380px; width: auto; display: block; background-color: transparent;">
-        
-        <div class="maskot-overlay">
-            <h1 class="display-4 fw-bold text-white mb-2" style="text-shadow: 2px 4px 8px rgba(0,0,0,0.8);">
-                WM 2026
-            </h1>
-            <a class="btn btn-warning btn-lg fw-bold shadow border-0 text-white"
-               asp-controller="Home" asp-action="Schedule" 
-               style="border-width: 2px;">
+        @* Logo-Bereich mit Schwebe-Animation *@
+        <div class="mb-5 d-flex justify-content-center align-items-center" style="min-height: 400px;">
+            <img src="/Images/2026_FIFA_World_Cup.svg"
+                 alt="FIFA 2026 Logo"
+                 class="img-fluid"
+                 style="width: 100%; max-width: 450px; height: auto; display: block;"
+                 onerror="this.style.display='none';">
+        </div>
+
+        @* Zentraler Call-to-Action *@
+        <div class="mt-4">
+            <a class="btn btn-hero-tippen shadow-lg"
+                   asp-controller="Home" asp-action="Schedule">
                 JETZT TIPPEN
             </a>
         </div>
+        
     </div>
 </div>
 
-
-@if (Model.NextGame != null)
+@* --- SEKTION: DIE NÄCHSTEN 3 PARTIEN --- *@
+@if (Model.UpcomingGames != null && Model.UpcomingGames.Any())
 {
-    <div class="card mb-4 border-0 shadow-sm" style="background: rgba(10, 54, 34, 0.85); color: white;">
-        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center py-2">
-            <div>
-                <strong class="text-warning">Nächstes Spiel:</strong> @Model.NextGame.HomeTeam vs. @Model.NextGame.AwayTeam
-                @if (!string.IsNullOrWhiteSpace(Model.NextGame.GroupName))
-                {
-                    <span class="ms-2 badge rounded-pill" style="background: rgba(255,255,255,0.2);">Gruppe @Model.NextGame.GroupName</span>
-                }
+    <div class="mb-5">
+        @* Trenner mit Text *@
+        <div class="d-flex align-items-center mb-4">
+            <div class="flex-grow-1 opacity-25"><hr class="text-white"></div>
+            <div class="px-3 fw-bold text-uppercase text-white small" style="letter-spacing: 3px; text-shadow: 1px 1px 4px rgba(0,0,0,0.5);">
+                <i class="bi bi-clock-history me-2"></i>Anstehende Spiele
             </div>
-            <div class="mt-2 mt-md-0 opacity-75">
-                @(Model.NextGame.KickOff == default ? "Datum folgt" : Model.NextGame.KickOff.ToLocalTime().ToString("dd.MM.yyyy HH:mm"))
-            </div>
+            <div class="flex-grow-1 opacity-25"><hr class="text-white"></div>
+        </div>
+
+        <div class="row g-3">
+            @foreach (var game in Model.UpcomingGames.Take(3))
+            {
+                <div class="col-12 col-md-4">
+                    <div class="card h-100 border-0 shadow-lg game-card-hover"
+                         style="background: rgba(255, 255, 255, 0.95); border-radius: 15px;">
+                        <div class="card-body p-3">
+                            @* Zeit & Gruppe *@
+                            <div class="d-flex justify-content-between mb-3 small fw-bold text-muted text-uppercase" style="font-size: 0.7rem;">
+                                <span>@game.KickOff.ToLocalTime().ToString("dd.MM. | HH:mm")</span>
+                                <span class="text-success">Gruppe @game.GroupName</span>
+                            </div>
+
+                            @* Paarung *@
+                            <div class="d-flex align-items-center justify-content-around mb-2">
+                                <div class="text-center" style="width: 40%;">
+                                    <span class="fi @FlagHelper.GetFlagClass(game.HomeTeam) fs-2 mb-2 d-block mx-auto shadow-sm" style="border-radius: 2px;"></span>
+                                    <div class="small fw-bold text-dark text-truncate">@game.HomeTeam</div>
+                                </div>
+                                
+                                <div class="fw-bold text-muted px-2">VS</div>
+
+                                <div class="text-center" style="width: 40%;">
+                                    <span class="fi @FlagHelper.GetFlagClass(game.AwayTeam) fs-2 mb-2 d-block mx-auto shadow-sm" style="border-radius: 2px;"></span>
+                                    <div class="small fw-bold text-dark text-truncate">@game.AwayTeam</div>
+                                </div>
+                            </div>
+                        </div>
+                        @* Direkter Link *@
+                        <div class="card-footer border-0 bg-light text-center py-2" style="border-radius: 0 0 15px 15px;">
+                            <a asp-controller="Home" asp-action="Schedule" class="text-decoration-none small fw-bold text-success">
+                                Tipp abgeben <i class="bi bi-chevron-right small"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 }
 
-<div class="row g-4">
+@* --- DASHBOARD NAVIGATION (KACHELN) --- *@
+<div class="row g-4 mb-5">
+    @* Gruppenübersicht *@
     <div class="col-12 col-md-4">
-        <div class="card h-100 shadow-sm border-0">
-            <div class="card-body d-flex flex-column">
+        <div class="card h-100 shadow-sm border-0" style="border-radius: 1rem;">
+            <div class="card-body d-flex flex-column p-4">
                 <div class="d-flex justify-content-between align-items-start mb-3">
-                    <h5 class="card-title fw-bold" style="color: var(--bs-success-text-emphasis);">Gruppenübersicht</h5>
+                    <h5 class="card-title fw-bold" style="color: var(--bs-success-text-emphasis);">Gruppen</h5>
                     <span class="badge rounded-pill px-3 py-2" style="background-color: var(--bs-success-text-emphasis);">@Model.GroupCount</span>
                 </div>
-                <p class="card-text text-muted small">Alle Gruppen mit Teams und Ergebnissen.</p>
-                <a class="btn-pill-dark mt-auto" asp-controller="Home" asp-action="Groups">Zur Übersicht</a>
+                <p class="card-text text-muted small">Tabelle und Standings aller WM-Gruppen einsehen.</p>
+                <a class="btn btn-outline-success mt-auto rounded-pill fw-bold" asp-controller="Home" asp-action="Groups">Zur Übersicht</a>
             </div>
         </div>
     </div>
 
+    @* Spielplan *@
     <div class="col-12 col-md-4">
-        <div class="card h-100 shadow-sm border-0">
-            <div class="card-body d-flex flex-column">
+        <div class="card h-100 shadow-sm border-0" style="border-radius: 1rem;">
+            <div class="card-body d-flex flex-column p-4">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <h5 class="card-title fw-bold" style="color: var(--bs-success-text-emphasis);">Spielplan</h5>
                     <span class="badge rounded-pill px-3 py-2" style="background-color: var(--bs-success-text-emphasis);">@Model.GameCount</span>
                 </div>
-                <p class="card-text text-muted small">Alle Spiele nach Datum sortiert.</p>
-                <a class="btn-pill-dark mt-auto" asp-controller="Home" asp-action="Schedule">Zum Spielplan</a>
+                <p class="card-text text-muted small">Alle Termine, Stadien und Ergebnisse im Überblick.</p>
+                <a class="btn btn-outline-success mt-auto rounded-pill fw-bold" asp-controller="Home" asp-action="Schedule">Zum Spielplan</a>
             </div>
         </div>
     </div>
 
+    @* Rankings *@
     <div class="col-12 col-md-4">
-        <div class="card h-100 shadow-sm border-0">
-            <div class="card-body d-flex flex-column">
+        <div class="card h-100 shadow-sm border-0" style="border-radius: 1rem;">
+            <div class="card-body d-flex flex-column p-4">
                 <div class="d-flex justify-content-between align-items-start mb-3">
-                    <h5 class="card-title fw-bold" style="color: var(--bs-success-text-emphasis);">Tipps & Rankings</h5>
+                    <h5 class="card-title fw-bold" style="color: var(--bs-success-text-emphasis);">Rankings</h5>
                     <span class="badge rounded-pill px-3 py-2" style="background-color: var(--bs-success-text-emphasis);">@Model.TippCount</span>
                 </div>
-                <p class="card-text text-muted small">Aktueller Punktestand aller Teilnehmer.</p>
-                <a class="btn-pill-dark mt-auto" asp-controller="Home" asp-action="Rankings">Zu den Rankings</a>
+                <p class="card-text text-muted small">Wer führt die Tabelle an? Jetzt Punktestand prüfen.</p>
+                <a class="btn btn-outline-success mt-auto rounded-pill fw-bold" asp-controller="Home" asp-action="Rankings">Zu den Rankings</a>
             </div>
         </div>
     </div>

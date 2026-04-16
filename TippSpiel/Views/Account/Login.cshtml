@@ -3,31 +3,49 @@
     ViewData["Title"] = "Login";
 }
 
-<h1 class="display-6 mb-4">Login</h1>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow-sm border-0" style="border-radius: 1rem; overflow: hidden;">
+            
+            <div class="card-header border-0 text-white text-center py-4"
+                 style="background-color: var(--bs-success-text-emphasis);">
+                <h2 class="h4 mb-0">Willkommen zurück!</h2>
+            </div>
+            
+            <div class="card-body p-4">
+                <form asp-action="Login" method="post">
+                    <input type="hidden" asp-for="ReturnUrl" />
+                    
+                    <div class="mb-3">
+                        <label asp-for="UserName" class="form-label fw-bold small text-muted text-uppercase">Benutzername</label>
+                        <input asp-for="UserName" class="form-control" placeholder="Dein Name" />
+                        <span asp-validation-for="UserName" class="text-danger small"></span>
+                    </div>
 
-<form asp-action="Login" method="post" class="card shadow-sm">
-    <div class="card-body">
-        <input type="hidden" asp-for="ReturnUrl" />
-        <div class="mb-3">
-            <label asp-for="UserName" class="form-label"></label>
-            <input asp-for="UserName" class="form-control" />
-            <span asp-validation-for="UserName" class="text-danger"></span>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-bold small text-muted text-uppercase">Passwort</label>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label small text-muted">Angemeldet bleiben</label>
+                    </div>
+
+                    <div class="text-danger small mb-3" asp-validation-summary="ModelOnly"></div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-lg text-white"
+                                style="background-color: var(--bs-success-text-emphasis); border-radius: 0.5rem;">
+                            Anmelden
+                        </button>
+                        <a asp-action="Register" class="btn btn-outline-secondary border-0 small">
+                            Neu hier? Registrieren
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="mb-3">
-            <label asp-for="Password" class="form-label"></label>
-            <input asp-for="Password" class="form-control" />
-            <span asp-validation-for="Password" class="text-danger"></span>
-        </div>
-        <div class="form-check mb-3">
-            <input asp-for="RememberMe" class="form-check-input" />
-            <label asp-for="RememberMe" class="form-check-label"></label>
-        </div>
-        <div class="text-danger" asp-validation-summary="ModelOnly"></div>
-        <button type="submit" class="btn btn-primary">Anmelden</button>
-        <a asp-action="Register" class="btn btn-link">Registrieren</a>
     </div>
-</form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+</div>

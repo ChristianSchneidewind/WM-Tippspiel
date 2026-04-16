@@ -4,22 +4,67 @@
     ViewData["Title"] = "Admin Login";
 }
 
-<h1>Admin Login</h1>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5 col-lg-4">
+        @* Ein spezielles Card-Design für den Admin-Bereich *@
+        <div class="card shadow-lg border-0" style="border-radius: 1rem; overflow: hidden;">
+            
+            @* Header in Dunkelgrau/Schwarz, um den Admin-Status zu betonen *@
+            <div class="card-header border-0 text-white text-center py-4 bg-dark">
+                <i class="bi bi-shield-lock display-4 text-warning"></i>
+                <h2 class="h4 mb-0 mt-2">Admin Control</h2>
+                <p class="small text-muted mb-0">Bitte autorisieren Sie sich</p>
+            </div>
+            
+            <div class="card-body p-4 bg-white">
+                <form asp-action="Login" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-<form asp-action="Login" method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    @* Username *@
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label fw-bold small text-muted text-uppercase">Admin-Kennung</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-badge"></i></span>
+                            <input asp-for="Username" class="form-control bg-light border-start-0" placeholder="Username" autofocus />
+                        </div>
+                        <span asp-validation-for="Username" class="text-danger small"></span>
+                    </div>
 
-    <div class="mb-3">
-        <label asp-for="Username" class="form-label"></label>
-        <input asp-for="Username" class="form-control" />
-        <span asp-validation-for="Username" class="text-danger"></span>
+                    @* Password *@
+                    <div class="mb-4">
+                        <label asp-for="Password" class="form-label fw-bold small text-muted text-uppercase">Sicherheitsschlüssel</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-key"></i></span>
+                            <input asp-for="Password" type="password" class="form-control bg-light border-start-0" placeholder="••••••••" />
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-dark btn-lg shadow-sm" style="border-radius: 0.5rem;">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Dashboard betreten
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="card-footer bg-light border-0 py-3 text-center">
+                <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted small">
+                    <i class="bi bi-house-door"></i> Zurück zur öffentlichen Seite
+                </a>
+            </div>
+        </div>
+        
+        @* Kleiner Sicherheitshinweis *@
+        <div class="alert alert-warning mt-4 border-0 shadow-sm d-flex align-items-center" role="alert" style="font-size: 0.8rem;">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <div>
+                Zugriff nur für autorisiertes Personal. Alle Aktivitäten werden protokolliert.
+            </div>
+        </div>
     </div>
+</div>
 
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Login</button>
-</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

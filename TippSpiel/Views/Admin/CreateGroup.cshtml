@@ -4,17 +4,62 @@
     ViewData["Title"] = "Gruppe anlegen";
 }
 
-<h1>Gruppe anlegen</h1>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm border-0" style="border-radius: 1rem; overflow: hidden;">
+            
+            @* Header im einheitlichen Stil *@
+            <div class="card-header border-0 text-white py-3 text-center"
+                 style="background-color: var(--bs-success-text-emphasis);">
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-grid-3x3-gap-fill fs-4"></i>
+                    <h2 class="h5 mb-0">Neue Gruppe erstellen</h2>
+                </div>
+            </div>
 
-<form asp-action="CreateGroup" method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="card-body p-4">
+                <form asp-action="CreateGroup" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-    <div class="mb-3">
-        <label asp-for="Name" class="form-label"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+                    <div class="mb-4">
+                        <label asp-for="Name" class="form-label fw-bold small text-muted text-uppercase">Gruppenname / Bezeichnung</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted">
+                                <i class="bi bi-tag"></i>
+                            </span>
+                            <input asp-for="Name" class="form-control bg-light border-start-0" placeholder="z.B. Gruppe A" autofocus />
+                        </div>
+                        <div class="form-text mt-2" style="font-size: 0.75rem;">
+                            Tipp: Benutze einfache Namen wie "A", "B" oder "Gruppe A".
+                        </div>
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <hr class="text-muted opacity-25">
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn text-white py-2"
+                                style="background-color: var(--bs-success-text-emphasis); border-radius: 0.5rem;">
+                            <i class="bi bi-save me-1"></i> Gruppe speichern
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary py-2" style="border-radius: 0.5rem;">
+                            Abbrechen
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        @* Kleiner Info-Text unter der Card *@
+        <div class="text-center mt-3">
+            <p class="text-muted small">
+                <i class="bi bi-info-circle me-1"></i>
+                Nach dem Erstellen kannst du dieser Gruppe Spiele und Teams zuweisen.
+            </p>
+        </div>
     </div>
+</div>
 
-    <button type="submit" class="btn btn-primary">Speichern</button>
-    <a asp-action="Index" class="btn btn-link">Zurück</a>
-</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -21,14 +21,14 @@ namespace TippSpiel
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddScoped<IGameRepository, EfGameRepository>();
             builder.Services.AddIdentity<User, IdentityRole>(options =>
-                {
-                    options.SignIn.RequireConfirmedAccount = false;
-                    options.Password.RequiredLength = 8;
-                    options.Password.RequireDigit = true;
-                    options.Password.RequireNonAlphanumeric = true;
-                    options.Password.RequireUppercase = true;
-                    options.Password.RequireLowercase = true;
-                })
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+                options.Password.RequiredLength = 8;
+                options.Password.RequireDigit = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = true;
+            })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
             builder.Services.ConfigureApplicationCookie(options =>
