@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TippSpiel.Models;
@@ -7,6 +8,7 @@ using TippSpiel.Models.ViewModels;
 
 namespace TippSpiel.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly ApplicationDbContext _db;
@@ -17,10 +19,14 @@ public class HomeController : Controller
     }
 
     // --- STARTSEITE ---
+    [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
         var now = DateTimeOffset.Now;
-        var allGames = await _db.Games.Include(g => g.Group).ToListAsync();
+
+        var allGames = await _db.Games
+            .Include(g => g.Group)
+            .ToListAsync();
 
         var upcomingGames = allGames
             .Where(g => g.KickOff > now)
@@ -48,7 +54,9 @@ public class HomeController : Controller
     // --- GRUPPENÜBERSICHT & TABELLEN ---
     public async Task<IActionResult> Groups()
     {
-        var groupsData = await _db.Groups.Include(g => g.Games).ToListAsync();
+        var groupsData = await _db.Groups
+            .Include(g => g.Games)
+            .ToListAsync();
 
         // Namen global für diese Anfrage waschen
         foreach (var group in groupsData)
@@ -88,7 +96,9 @@ public class HomeController : Controller
     // --- FINALRUNDE ---
     public async Task<IActionResult> Finals()
     {
-        var allGames = await _db.Games.Include(g => g.Group).ToListAsync();
+        var allGames = await _db.Games
+            .Include(g => g.Group)
+            .ToListAsync();
 
         foreach (var game in allGames)
         {
@@ -105,13 +115,39 @@ public class HomeController : Controller
         {
             Rounds = new List<KnockoutRoundViewModel>
             {
-                new() { Name = "Sechzehntelfinale", Games = finalGames.Where(g => g.MatchNumber is >= 73 and <= 88).ToList() },
-                new() { Name = "Achtelfinale", Games = finalGames.Where(g => g.MatchNumber is >= 89 and <= 96).ToList() },
-                new() { Name = "Viertelfinale", Games = finalGames.Where(g => g.MatchNumber is >= 97 and <= 100).ToList() },
-                new() { Name = "Halbfinale", Games = finalGames.Where(g => g.MatchNumber is >= 101 and <= 102).ToList() },
-                new() { Name = "Spiel um Platz 3", Games = finalGames.Where(g => g.MatchNumber == 103).ToList() },
-                new() { Name = "Finale", Games = finalGames.Where(g => g.MatchNumber == 104).ToList() }
-            }.Where(r => r.Games.Any()).ToList()
+                new()
+                {
+                    Name = "Sechzehntelfinale",
+                    Games = finalGames.Where(g => g.MatchNumber is >= 73 and <= 88).ToList()
+                },
+                new()
+                {
+                    Name = "Achtelfinale",
+                    Games = finalGames.Where(g => g.MatchNumber is >= 89 and <= 96).ToList()
+                },
+                new()
+                {
+                    Name = "Viertelfinale",
+                    Games = finalGames.Where(g => g.MatchNumber is >= 97 and <= 100).ToList()
+                },
+                new()
+                {
+                    Name = "Halbfinale",
+                    Games = finalGames.Where(g => g.MatchNumber is >= 101 and <= 102).ToList()
+                },
+                new()
+                {
+                    Name = "Spiel um Platz 3",
+                    Games = finalGames.Where(g => g.MatchNumber == 103).ToList()
+                },
+                new()
+                {
+                    Name = "Finale",
+                    Games = finalGames.Where(g => g.MatchNumber == 104).ToList()
+                }
+            }
+            .Where(r => r.Games.Any())
+            .ToList()
         };
 
         return View(model);
@@ -120,7 +156,9 @@ public class HomeController : Controller
     // --- SPIELPLAN ---
     public async Task<IActionResult> Schedule()
     {
-        var gamesFromDb = await _db.Games.Include(g => g.Group).ToListAsync();
+        var gamesFromDb = await _db.Games
+            .Include(g => g.Group)
+            .ToListAsync();
 
         foreach (var game in gamesFromDb)
         {
@@ -128,8 +166,14 @@ public class HomeController : Controller
             game.AwayTeam = FixTeamName(game.AwayTeam);
         }
 
-        var sortedGames = gamesFromDb.OrderBy(g => g.KickOff).ToList();
-        return View(new ScheduleViewModel { Games = sortedGames });
+        var sortedGames = gamesFromDb
+            .OrderBy(g => g.KickOff)
+            .ToList();
+
+        return View(new ScheduleViewModel
+        {
+            Games = sortedGames
+        });
     }
 
     // --- RANGLISTE ---
@@ -140,19 +184,25 @@ public class HomeController : Controller
             {
                 UserId = u.Id,
                 UserName = u.UserName ?? "Anonym",
-                Points = _db.Tipps.Where(t => t.UserId == u.Id).Sum(t => (int?)t.points) ?? 0
+                Points = _db.Tipps
+                    .Where(t => t.UserId == u.Id)
+                    .Sum(t => (int?)t.points) ?? 0
             })
             .OrderByDescending(e => e.Points)
             .ToListAsync();
 
-        return View(new RankingsViewModel { Entries = entries });
+        return View(new RankingsViewModel
+        {
+            Entries = entries
+        });
     }
 
     // --- HILFSMETHODEN ---
-
     private static void CalculateTable(GroupOverviewViewModel groupVm)
     {
-        var rows = groupVm.Teams.Select(name => new TableRowViewModel { TeamName = name }).ToList();
+        var rows = groupVm.Teams
+            .Select(name => new TableRowViewModel { TeamName = name })
+            .ToList();
 
         foreach (var game in groupVm.Games.Where(g => g.HomeTeamScore.HasValue && g.AwayTeamScore.HasValue))
         {
@@ -161,13 +211,34 @@ public class HomeController : Controller
 
             if (home != null && away != null)
             {
-                home.GamesPlayed++; away.GamesPlayed++;
-                home.GoalsFor += game.HomeTeamScore!.Value; home.GoalsAgainst += game.AwayTeamScore!.Value;
-                away.GoalsFor += game.AwayTeamScore!.Value; away.GoalsAgainst += game.HomeTeamScore!.Value;
+                home.GamesPlayed++;
+                away.GamesPlayed++;
 
-                if (game.HomeTeamScore > game.AwayTeamScore) { home.Wins++; home.Points += 3; away.Losses++; }
-                else if (game.HomeTeamScore < game.AwayTeamScore) { away.Wins++; away.Points += 3; home.Losses++; }
-                else { home.Draws++; away.Draws++; home.Points += 1; away.Points += 1; }
+                home.GoalsFor += game.HomeTeamScore!.Value;
+                home.GoalsAgainst += game.AwayTeamScore!.Value;
+
+                away.GoalsFor += game.AwayTeamScore!.Value;
+                away.GoalsAgainst += game.HomeTeamScore!.Value;
+
+                if (game.HomeTeamScore > game.AwayTeamScore)
+                {
+                    home.Wins++;
+                    home.Points += 3;
+                    away.Losses++;
+                }
+                else if (game.HomeTeamScore < game.AwayTeamScore)
+                {
+                    away.Wins++;
+                    away.Points += 3;
+                    home.Losses++;
+                }
+                else
+                {
+                    home.Draws++;
+                    away.Draws++;
+                    home.Points += 1;
+                    away.Points += 1;
+                }
             }
         }
 
@@ -177,12 +248,15 @@ public class HomeController : Controller
             .ThenByDescending(r => r.GoalsFor)
             .ToList();
 
-        for (int i = 0; i < groupVm.TableRows.Count; i++) groupVm.TableRows[i].Position = i + 1;
+        for (int i = 0; i < groupVm.TableRows.Count; i++)
+            groupVm.TableRows[i].Position = i + 1;
     }
 
     private string FixTeamName(string name)
     {
-        if (string.IsNullOrEmpty(name)) return name;
+        if (string.IsNullOrEmpty(name))
+            return name;
+
         return name.Trim() switch
         {
             "Saudiarabien" => "Saudi-Arabien",
@@ -193,8 +267,13 @@ public class HomeController : Controller
         };
     }
 
+    [AllowAnonymous]
     public IActionResult Privacy() => View();
 
+    [AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    public IActionResult Error() => View(new ErrorViewModel
+    {
+        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+    });
 }
