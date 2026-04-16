@@ -1,19 +1,18 @@
 @using Microsoft.AspNetCore.Identity
 @using TippSpiel.Models
-@* Hier nutzen wir explizit IdentityUser, falls deine User-Klasse davon erbt *@
+
 @inject SignInManager<TippSpiel.Models.User> SignInManager
 @inject UserManager<TippSpiel.Models.User> UserManager
 
 <ul class="nav nav-pills nav-pill-container ms-auto">
-
     @if (SignInManager.IsSignedIn(User))
     {
         <li class="nav-item">
             <span class="nav-link disabled text-muted px-3">
-                <i class="bi bi-person-fill"></i> @User.Identity?.Name
+                @User.Identity?.Name
             </span>
         </li>
-        
+
         @if (User.IsInRole("Admin"))
         {
             <li class="nav-item">
@@ -24,8 +23,9 @@
 
         <li class="nav-item">
             <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
                 <button type="submit" class="nav-link rounded-5 border-0 bg-transparent text-danger">
-                    <i class="bi bi-box-arrow-right"></i> Logout
+                    Logout
                 </button>
             </form>
         </li>
@@ -36,6 +36,7 @@
             <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Login" ? "active" : "")"
                asp-controller="Account" asp-action="Login">Login</a>
         </li>
+
         <li class="nav-item">
             <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Register" ? "active" : "")"
                asp-controller="Account" asp-action="Register">Registrieren</a>
