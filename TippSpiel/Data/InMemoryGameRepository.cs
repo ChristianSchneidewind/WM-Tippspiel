@@ -6,15 +6,31 @@ namespace TippSpiel.Data
     {
         private readonly List<Group> _groups = new();
         private readonly List<Game> _games = new();
+        private readonly List<Team> _teams = new();
         private int _nextGroupId = 1;
         private int _nextGameId = 1;
+        private int _nextTeamId = 1;
 
         public IEnumerable<Group> Groups => _groups;
         public IEnumerable<Game> Games => _games;
+        public IEnumerable<Team> Teams => _teams;
 
         public Group? GetGroup(int id) => _groups.FirstOrDefault(group => group.Id == id);
 
         public Game? GetGame(int id) => _games.FirstOrDefault(game => game.Id == id);
+
+        public Team? GetTeamByName(string name) => _teams.FirstOrDefault(t => t.Name == name);
+
+        public Team GetOrCreateTeam(string name)
+        {
+            var team = GetTeamByName(name);
+            if (team == null)
+            {
+                team = new Team { Id = _nextTeamId++, Name = name };
+                _teams.Add(team);
+            }
+            return team;
+        }
 
         public Group AddGroup(string name)
         {
@@ -39,6 +55,8 @@ namespace TippSpiel.Data
             var newGame = new Game
             {
                 Id = _nextGameId++,
+                HomeTeamId = game.HomeTeamId,
+                AwayTeamId = game.AwayTeamId,
                 HomeTeam = game.HomeTeam,
                 AwayTeam = game.AwayTeam,
                 KickOff = game.KickOff,
@@ -80,6 +98,8 @@ namespace TippSpiel.Data
                 newGroup.Games.Add(existing);
             }
 
+            existing.HomeTeamId = game.HomeTeamId;
+            existing.AwayTeamId = game.AwayTeamId;
             existing.HomeTeam = game.HomeTeam;
             existing.AwayTeam = game.AwayTeam;
             existing.KickOff = game.KickOff;

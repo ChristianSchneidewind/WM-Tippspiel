@@ -4,76 +4,146 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<h1>Admin Dashboard</h1>
+<div class="container py-4">
+    @* Header Bereich *@
+    <div class="d-flex justify-content-between align-items-center mb-5 p-3 rounded-3 shadow" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border-left: 5px solid #ffc107;">
+        <div>
+            <h1 class="text-white mb-0 fw-bold">Admin Control Center</h1>
+            <small class="text-white-50">Verwalte den Spielplan und die API-Daten</small>
+        </div>
+        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+             <button type="submit" class="btn btn-outline-danger btn-sm">Abmelden</button>
+        </form>
+    </div>
 
-<form asp-action="Logout" method="post" class="mb-3">
-    <button type="submit" class="btn btn-outline-secondary">Logout</button>
-</form>
+    @* Quick Actions / API Bereich *@
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card bg-dark text-white shadow-lg border-0">
+                <div class="card-body d-flex gap-3 align-items-center">
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1 text-warning">API Schnittstelle (Football-Data)</h5>
+                        <p class="mb-0 small text-muted">Synchronisiere den Spielplan oder hole aktuelle Ergebnisse live ab.</p>
+                    </div>
+                    <form asp-action="ImportSchedule" method="post">
+                        <button type="submit" class="btn btn-warning px-4 shadow">
+                            <i class="bi bi-download"></i> Full Import
+                        </button>
+                    </form>
+                    <form asp-action="SyncResults" method="post">
+                        <button type="submit" class="btn btn-success px-4 shadow">
+                            <i class="bi bi-arrow-repeat"></i> Sync Live
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<section class="mb-4">
-    <h2>Gruppen</h2>
-    <a asp-action="CreateGroup" class="btn btn-primary mb-2">Gruppe anlegen</a>
-
-    @if (!Model.Groups.Any())
-    {
-        <p>Noch keine Gruppen angelegt.</p>
-    }
-    else
-    {
-        <ul>
-            @foreach (var group in Model.Groups)
-            {
-                <li>@group.Name (@group.Games.Count Spiele)</li>
-            }
-        </ul>
-    }
-</section>
-
-<section>
-    <h2>Spiele</h2>
-    <a asp-action="CreateGame" class="btn btn-primary mb-2">Spiel anlegen</a>
-
-    @if (!Model.Games.Any())
-    {
-        <p>Noch keine Spiele angelegt.</p>
-    }
-    else
-    {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Spiel</th>
-                    <th>Gruppe</th>
-                    <th>Anstoß</th>
-                    <th>Ergebnis</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var game in Model.Games)
-                {
-                    <tr>
-                        <td>@game.HomeTeam vs @game.AwayTeam</td>
-                        <td>@game.Group?.Name</td>
-                        <td>@game.KickOff.LocalDateTime.ToString("g")</td>
-                        <td>
-                            @if (game.HomeTeamScore.HasValue && game.AwayTeamScore.HasValue)
+    <div class="row">
+        @* Linke Spalte: Gruppen *@
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 bg-dark text-white border-0 shadow">
+                <div class="card-header border-bottom border-secondary d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Gruppen</h5>
+                    <a asp-action="CreateGroup" class="btn btn-primary btn-sm rounded-circle"><i class="bi bi-plus"></i>+</a>
+                </div>
+                <div class="card-body">
+                    @if (!Model.Groups.Any())
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <p>Keine Gruppen vorhanden.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var group in Model.Groups)
                             {
-                                <span>@game.HomeTeamScore : @game.AwayTeamScore</span>
+                                <div class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center px-0">
+                                    <span>@group.Name</span>
+                                    <span class="badge rounded-pill bg-secondary">@group.Games.Count Spiele</span>
+                                </div>
                             }
-                            else
-                            {
-                                <span>Offen</span>
-                            }
-                        </td>
-                        <td>
-                            <a asp-action="EditGame" asp-route-id="@game.Id">Bearbeiten</a>
-                            |
-                            <a asp-action="Result" asp-route-id="@game.Id">Ergebnis</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @* Rechte Spalte: Spiele *@
+        <div class="col-md-8 mb-4">
+            <div class="card h-100 bg-dark text-white border-0 shadow">
+                <div class="card-header border-bottom border-secondary d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Spiele</h5>
+                    <a asp-action="CreateGame" class="btn btn-primary btn-sm">Neues Spiel</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead class="table-light text-dark">
+                                <tr>
+                                    <th>Partie</th>
+                                    <th>Gruppe</th>
+                                    <th>Anstoß</th>
+                                    <th class="text-center">Ergebnis</th>
+                                    <th class="text-end">Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var game in Model.Games.OrderBy(g => g.KickOff))
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold">@game.HomeTeamName</div>
+                                            <div class="fw-bold text-muted small">@game.AwayTeamName</div>
+                                        </td>
+                                        <td><span class="badge bg-outline-info border border-info text-info">@game.Group?.Name</span></td>
+                                        <td class="small">@game.KickOff.LocalDateTime.ToString("g")</td>
+                                        <td class="text-center">
+                                            @if (game.HomeTeamScore.HasValue)
+                                            {
+                                                <span class="badge bg-success">@game.HomeTeamScore : @game.AwayTeamScore</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted italic">ausstehend</span>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="btn-group">
+                                                <a asp-action="EditGame" asp-route-id="@game.Id" class="btn btn-sm btn-outline-light border-0">
+                                                     🖊️
+                                                </a>
+                                                <a asp-action="Result" asp-route-id="@game.Id" class="btn btn-sm btn-outline-warning border-0">
+                                                     ⚽
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Kleiner CSS-Boost für den Admin-Bereich */
+    body {
+        background-color: #1a1a1a; /* Damit der Hintergrund zum Admin-Theme passt */
     }
-</section>
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+    .card {
+        border-radius: 15px;
+    }
+    .card-header {
+        background-color: rgba(255,255,255,0.03);
+        font-weight: bold;
+    }
+</style>

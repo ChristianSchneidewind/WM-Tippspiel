@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 using TippSpiel.Data;
 using TippSpiel.Models;
 using TippSpiel.Models.Admin;
-using System.IO;
+using TippSpiel.Services;
 
 namespace TippSpiel
 {
@@ -17,14 +18,15 @@ namespace TippSpiel
             builder.Services.AddControllersWithViews();
             builder.Services.Configure<AdminOptions>(builder.Configuration.GetSection("Admin"));
             builder.Services.Configure<SeedUsersOptions>(builder.Configuration.GetSection("SeedUsers"));
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>  options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddScoped<IGameRepository, EfGameRepository>();
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
                 options.Password.RequiredLength = 8;
                 options.Password.RequireDigit = true;
+
                 options.Password.RequireNonAlphanumeric = true;
                 options.Password.RequireUppercase = true;
                 options.Password.RequireLowercase = true;
@@ -37,7 +39,9 @@ namespace TippSpiel
                 options.AccessDeniedPath = "/Account/Login";
             });
             builder.Services.AddAuthorization();
-
+            // Registriere den HttpClient und den Service
+            builder.Services.AddHttpClient<FootballApiService>();
+            builder.Services.AddScoped<FootballApiService>();
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())

@@ -20,7 +20,11 @@ public class HomeController : Controller
     public async Task<IActionResult> Index()
     {
         var now = DateTimeOffset.Now;
-        var allGames = await _db.Games.Include(g => g.Group).ToListAsync();
+        var allGames = await _db.Games
+            .Include(g => g.Group)
+            .Include(g => g.HomeTeam)
+            .Include(g => g.AwayTeam)
+            .ToListAsync();
 
         var upcomingGames = allGames
             .Where(g => g.KickOff > now)
@@ -29,8 +33,8 @@ public class HomeController : Controller
             .Select(game => new UpcomingGameViewModel
             {
                 Id = game.Id,
-                HomeTeam = FixTeamName(game.HomeTeam),
-                AwayTeam = FixTeamName(game.AwayTeam),
+                HomeTeam = FixTeamName(game.HomeTeamName),
+                AwayTeam = FixTeamName(game.AwayTeamName),
                 GroupName = game.Group?.Name ?? "Unbekannt",
                 KickOff = game.KickOff
             })
@@ -48,17 +52,10 @@ public class HomeController : Controller
     // --- GRUPPENÜBERSICHT & TABELLEN ---
     public async Task<IActionResult> Groups()
     {
-        var groupsData = await _db.Groups.Include(g => g.Games).ToListAsync();
-
-        // Namen global für diese Anfrage waschen
-        foreach (var group in groupsData)
-        {
-            foreach (var game in group.Games)
-            {
-                game.HomeTeam = FixTeamName(game.HomeTeam);
-                game.AwayTeam = FixTeamName(game.AwayTeam);
-            }
-        }
+        var groupsData = await _db.Groups
+            .Include(g => g.Games).ThenInclude(game => game.HomeTeam)
+            .Include(g => g.Games).ThenInclude(game => game.AwayTeam)
+            .ToListAsync();
 
         var groupsVm = groupsData
             .Where(g => !g.Name.Equals("Finalrunde", StringComparison.OrdinalIgnoreCase))
@@ -68,10 +65,11 @@ public class HomeController : Controller
                 GroupId = g.Id,
                 GroupName = g.Name,
                 Teams = g.Games
-                    .SelectMany(x => new[] { x.HomeTeam, x.AwayTeam })
+                    .SelectMany(x => new[] { x.HomeTeamName, x.AwayTeamName })
                     .Distinct()
                     .Where(t => !string.IsNullOrEmpty(t))
                     .OrderBy(t => t)
+                    .Select(t => FixTeamName(t))
                     .ToList(),
                 Games = g.Games.OrderBy(x => x.KickOff).ToList()
             })
@@ -88,13 +86,11 @@ public class HomeController : Controller
     // --- FINALRUNDE ---
     public async Task<IActionResult> Finals()
     {
-        var allGames = await _db.Games.Include(g => g.Group).ToListAsync();
-
-        foreach (var game in allGames)
-        {
-            game.HomeTeam = FixTeamName(game.HomeTeam);
-            game.AwayTeam = FixTeamName(game.AwayTeam);
-        }
+        var allGames = await _db.Games
+            .Include(g => g.Group)
+            .Include(g => g.HomeTeam)
+            .Include(g => g.AwayTeam)
+            .ToListAsync();
 
         var finalGames = allGames
             .Where(g => g.Group != null && g.Group.Name.Equals("Finalrunde", StringComparison.OrdinalIgnoreCase))
@@ -120,13 +116,11 @@ public class HomeController : Controller
     // --- SPIELPLAN ---
     public async Task<IActionResult> Schedule()
     {
-        var gamesFromDb = await _db.Games.Include(g => g.Group).ToListAsync();
-
-        foreach (var game in gamesFromDb)
-        {
-            game.HomeTeam = FixTeamName(game.HomeTeam);
-            game.AwayTeam = FixTeamName(game.AwayTeam);
-        }
+        var gamesFromDb = await _db.Games
+            .Include(g => g.Group)
+            .Include(g => g.HomeTeam)
+            .Include(g => g.AwayTeam)
+            .ToListAsync();
 
         var sortedGames = gamesFromDb.OrderBy(g => g.KickOff).ToList();
         return View(new ScheduleViewModel { Games = sortedGames });
@@ -156,8 +150,12 @@ public class HomeController : Controller
 
         foreach (var game in groupVm.Games.Where(g => g.HomeTeamScore.HasValue && g.AwayTeamScore.HasValue))
         {
-            var home = rows.FirstOrDefault(r => r.TeamName == game.HomeTeam);
-            var away = rows.FirstOrDefault(r => r.TeamName == game.AwayTeam);
+            // Normalize game team names to the same normalized form as groupVm.Teams
+            var homeName = FixTeamName(game.HomeTeamName);
+            var awayName = FixTeamName(game.AwayTeamName);
+
+            var home = rows.FirstOrDefault(r => r.TeamName == homeName);
+            var away = rows.FirstOrDefault(r => r.TeamName == awayName);
 
             if (home != null && away != null)
             {
@@ -180,7 +178,7 @@ public class HomeController : Controller
         for (int i = 0; i < groupVm.TableRows.Count; i++) groupVm.TableRows[i].Position = i + 1;
     }
 
-    private string FixTeamName(string name)
+    private static string FixTeamName(string name)
     {
         if (string.IsNullOrEmpty(name)) return name;
         return name.Trim() switch
