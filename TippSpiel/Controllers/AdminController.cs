@@ -11,7 +11,7 @@ using TippSpiel.Services;
 
 namespace TippSpiel.Controllers;
 
-//[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin")]
 public class AdminController : Controller
 {
     private readonly IGameRepository _repository;
