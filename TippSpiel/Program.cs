@@ -1,9 +1,11 @@
+using DotNetEnv;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 using TippSpiel.Data;
 using TippSpiel.Models;
 using TippSpiel.Models.Admin;
-using System.IO;
+using TippSpiel.Services;
 
 namespace TippSpiel
 {
@@ -11,14 +13,17 @@ namespace TippSpiel
     {
         public static void Main(string[] args)
         {
+            // Lade lokale .env (muss vor CreateBuilder passieren)
+            Env.Load(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.Configure<AdminOptions>(builder.Configuration.GetSection("Admin"));
             builder.Services.Configure<SeedUsersOptions>(builder.Configuration.GetSection("SeedUsers"));
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddScoped<IGameRepository, EfGameRepository>();
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
@@ -37,7 +42,9 @@ namespace TippSpiel
                 options.AccessDeniedPath = "/Account/Login";
             });
             builder.Services.AddAuthorization();
-
+            // Registriere den HttpClient und den Service
+            builder.Services.AddHttpClient<FootballApiService>();
+            builder.Services.AddScoped<FootballApiService>();
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
@@ -53,7 +60,6 @@ namespace TippSpiel
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 

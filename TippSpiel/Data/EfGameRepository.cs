@@ -14,11 +14,35 @@ namespace TippSpiel.Data
 
         public IEnumerable<Group> Groups => _db.Groups.Include(group => group.Games).AsNoTracking().ToList();
 
-        public IEnumerable<Game> Games => _db.Games.Include(game => game.Group).AsNoTracking().ToList();
+        public IEnumerable<Team> Teams => _db.Teams.AsNoTracking().ToList();
+
+        public IEnumerable<Game> Games => _db.Games
+            .Include(game => game.Group)
+            .Include(game => game.HomeTeam)
+            .Include(game => game.AwayTeam)
+            .AsNoTracking().ToList();
 
         public Group? GetGroup(int id) => _db.Groups.Include(group => group.Games).FirstOrDefault(group => group.Id == id);
 
-        public Game? GetGame(int id) => _db.Games.Include(game => game.Group).FirstOrDefault(game => game.Id == id);
+        public Game? GetGame(int id) => _db.Games
+            .Include(game => game.Group)
+            .Include(game => game.HomeTeam)
+            .Include(game => game.AwayTeam)
+            .FirstOrDefault(game => game.Id == id);
+
+        public Team? GetTeamByName(string name) => _db.Teams.FirstOrDefault(t => t.Name == name);
+
+        public Team GetOrCreateTeam(string name)
+        {
+            var team = GetTeamByName(name);
+            if (team == null)
+            {
+                team = new Team { Name = name };
+                _db.Teams.Add(team);
+                _db.SaveChanges();
+            }
+            return team;
+        }
 
         public Group AddGroup(string name)
         {
@@ -50,8 +74,8 @@ namespace TippSpiel.Data
                 throw new InvalidOperationException("Game not found.");
             }
 
-            existing.HomeTeam = game.HomeTeam;
-            existing.AwayTeam = game.AwayTeam;
+            existing.HomeTeamId = game.HomeTeamId;
+            existing.AwayTeamId = game.AwayTeamId;
             existing.KickOff = game.KickOff;
             existing.GroupId = game.GroupId;
             existing.HomeTeamScore = game.HomeTeamScore;

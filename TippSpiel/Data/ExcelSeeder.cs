@@ -57,7 +57,7 @@ namespace TippSpiel.Data
             db.Groups.AddRange(groups);
             db.SaveChanges();
 
-            var games = LoadMatches(dataSet, teamToGroup, groupLookup);
+            var games = LoadMatches(db, dataSet, teamToGroup, groupLookup);
             if (games.Count > 0)
             {
                 db.Games.AddRange(games);
@@ -110,7 +110,7 @@ namespace TippSpiel.Data
             return result;
         }
 
-        private static List<Game> LoadMatches(DataSet dataSet, Dictionary<string, string> teamToGroup, Dictionary<string, Group> groupLookup)
+        private static List<Game> LoadMatches(ApplicationDbContext db, DataSet dataSet, Dictionary<string, string> teamToGroup, Dictionary<string, Group> groupLookup)
         {
             var games = new List<Game>();
             if (!dataSet.Tables.Contains("Matches"))
@@ -157,10 +157,13 @@ namespace TippSpiel.Data
                     group = groupLookup["Finalrunde"];
                 }
 
+                var homeTeam = GetOrCreateTeam(db, team1);
+                var awayTeam = GetOrCreateTeam(db, team2);
+
                 games.Add(new Game
                 {
-                    HomeTeam = team1,
-                    AwayTeam = team2,
+                    HomeTeamId = homeTeam.Id,
+                    AwayTeamId = awayTeam.Id,
                     KickOff = kickOff,
                     MatchNumber = matchNumber,
                     GroupId = group.Id
@@ -168,6 +171,18 @@ namespace TippSpiel.Data
             }
 
             return games;
+        }
+
+        private static Team GetOrCreateTeam(ApplicationDbContext db, string name)
+        {
+            var team = db.Teams.FirstOrDefault(t => t.Name == name);
+            if (team == null)
+            {
+                team = new Team { Name = name };
+                db.Teams.Add(team);
+                db.SaveChanges();
+            }
+            return team;
         }
 
         private static string ResolveGroupName(Dictionary<string, string> teamToGroup, string team1, string team2, string teamsCode)
