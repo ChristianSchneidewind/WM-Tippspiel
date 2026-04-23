@@ -3,7 +3,8 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
-# dotenv files
+# Ignore local environment secrets		
+# lokale Secrets
 .env
 
 # User-specific files
@@ -480,3 +481,5 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+# im Projektordner
+pwsh -Command "dotnet add TippSpiel package DotNetEnv"

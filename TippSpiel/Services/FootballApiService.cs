@@ -142,7 +142,10 @@ namespace TippSpiel.Services
         private void PrepareHttpClient()
         {
             _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("x-apisports-key", _apiKey);
+            if (!string.IsNullOrEmpty(_apiKey))
+            {
+                _httpClient.DefaultRequestHeaders.Add("x-apisports-key", _apiKey);
+            }
         }
     }
 }

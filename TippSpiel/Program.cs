@@ -1,3 +1,4 @@
+using DotNetEnv;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
@@ -12,6 +13,9 @@ namespace TippSpiel
     {
         public static void Main(string[] args)
         {
+            // Lade lokale .env (muss vor CreateBuilder passieren)
+            Env.Load(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -19,14 +23,13 @@ namespace TippSpiel
             builder.Services.Configure<AdminOptions>(builder.Configuration.GetSection("Admin"));
             builder.Services.Configure<SeedUsersOptions>(builder.Configuration.GetSection("SeedUsers"));
 
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>  options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddScoped<IGameRepository, EfGameRepository>();
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
                 options.Password.RequiredLength = 8;
                 options.Password.RequireDigit = true;
-
                 options.Password.RequireNonAlphanumeric = true;
                 options.Password.RequireUppercase = true;
                 options.Password.RequireLowercase = true;
@@ -57,7 +60,6 @@ namespace TippSpiel
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
