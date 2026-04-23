@@ -45,6 +45,7 @@ namespace TippSpiel.Controllers
             }
 
             var loginName = model.UserName;
+
             if (model.UserName.Contains('@'))
             {
                 var userByEmail = await _userManager.FindByEmailAsync(model.UserName);
@@ -54,7 +55,12 @@ namespace TippSpiel.Controllers
                 }
             }
 
-            var result = await _signInManager.PasswordSignInAsync(loginName, model.Password, model.RememberMe, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(
+                loginName,
+                model.Password,
+                model.RememberMe,
+                lockoutOnFailure: false);
+
             if (!result.Succeeded)
             {
                 ModelState.AddModelError(string.Empty, "Ungültige Zugangsdaten.");
@@ -87,7 +93,8 @@ namespace TippSpiel.Controllers
 
             if (model.IsAdmin)
             {
-                if (string.IsNullOrWhiteSpace(model.AdminCode) || !string.Equals(model.AdminCode, _adminOptions.RegistrationCode, StringComparison.Ordinal))
+                if (string.IsNullOrWhiteSpace(model.AdminCode) ||
+                    !string.Equals(model.AdminCode, _adminOptions.RegistrationCode, StringComparison.Ordinal))
                 {
                     ModelState.AddModelError(nameof(RegisterViewModel.AdminCode), "Admin-Code ist ungültig.");
                     return View(model);
@@ -112,6 +119,7 @@ namespace TippSpiel.Controllers
             }
 
             var roleName = model.IsAdmin ? "Admin" : "User";
+
             if (!await _roleManager.RoleExistsAsync(roleName))
             {
                 await _roleManager.CreateAsync(new IdentityRole(roleName));
@@ -126,6 +134,12 @@ namespace TippSpiel.Controllers
             }
 
             return RedirectToAction("Index", "Home");
+        }
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
 
         [HttpPost]
