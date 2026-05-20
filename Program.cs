@@ -62,12 +62,7 @@ namespace TippSpiel
 
                 try
                 {
-                    // 0. Datenbank komplett zurücksetzen (löscht alle alten Daten!)
-                    Console.WriteLine("Lösche alte Datenbank...");
-                    db.Database.EnsureDeleted();
-
-                    // 1. Sicherstellen, dass die Datenbank existiert
-                    db.Database.EnsureCreated();
+                    db.Database.Migrate();
 
                     // 2. Excel-Import (Hauptquelle für Gruppen & Spielplan)
                     Console.WriteLine("Starte Excel-Import mit neuem Seeder...");
