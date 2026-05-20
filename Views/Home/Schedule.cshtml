@@ -1,0 +1,326 @@
+@using TippSpiel.Helpers
+@model TippSpiel.Models.ViewModels.ScheduleViewModel
+@{
+    ViewData["Title"] = "Spielplan";
+}
+
+<style>
+    .result-badge {
+        font-family: monospace;
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+        min-width: 65px;
+        display: inline-block;
+        line-height: 1.2;
+        text-align: center;
+        border-radius: 0.375rem;
+    }
+
+    .table-hover-custom tbody tr:hover {
+        filter: brightness(0.95);
+        transition: filter 0.2s;
+    }
+
+    .custom-border-green {
+        border-color: var(--bs-success-border-subtle) !important;
+    }
+
+    .align-header-middle th {
+        vertical-align: middle !important;
+        height: 55px;
+    }
+
+    .round-badge-pill {
+        background-color: var(--bs-success-text-emphasis);
+        color: white;
+        padding: 0.35rem 0.6rem;
+        border-radius: 50rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        min-width: 55px;
+        display: inline-block;
+        text-align: center;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+
+    .nowrap-column {
+        white-space: nowrap;
+    }
+
+    /* Styling für die Tipp-Eingabefelder */
+    .tip-input {
+        width: 42px;
+        text-align: center;
+        border: 2px solid var(--bs-success-border-subtle);
+        border-radius: 0.5rem;
+        font-weight: bold;
+        padding: 0.2rem;
+        transition: all 0.2s;
+    }
+
+        .tip-input:focus {
+            border-color: var(--bs-success);
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.15);
+            background-color: #fff;
+        }
+
+        /* Versteckt Pfeile bei Number-Inputs */
+        .tip-input::-webkit-outer-spin-button,
+        .tip-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+    .save-tip-btn {
+        transition: opacity 0.3s, transform 0.2s;
+    }
+
+        .save-tip-btn:hover {
+            transform: scale(1.2);
+        }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 page-title-container">
+    <h1 class="display-6 page-title">Spielplan</h1>
+</div>
+
+@if (Model.Games.Count == 0)
+{
+    <div class="card bg-light border-0 shadow-sm">
+        <div class="card-body text-center text-muted">Noch keine Spiele im Spielplan vorhanden.</div>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm border-0 overflow-hidden mb-5" style="border-radius: 1rem;">
+        <div class="card-header border-0 text-white d-flex justify-content-between align-items-center py-3"
+             style="background-color: var(--bs-success-text-emphasis);">
+            <strong class="fs-4">Turnierverlauf</strong>
+            <i class="bi bi-calendar3"></i>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="table-responsive rounded shadow-sm border border-2 custom-border-green">
+                <table class="table table-success table-striped table-hover-custom align-middle mb-0"
+                       style="--bs-table-striped-bg: #c8e6c9; --bs-table-bg: #e8f5e9;">
+
+                    <thead class="align-header-middle" style="background-color: var(--bs-success-text-emphasis);">
+                        <tr class="small text-white">
+                            <th class="ps-3" style="width: 70px;">MATCH</th>
+                            <th style="width: 110px;">TERMIN</th>
+                            <th class="nowrap-column" style="width: 220px;">ORT</th>
+                            <th class="text-center" style="width: 90px;">RUNDE</th>
+                            <th class="text-center">PARTIE</th>
+                            <th class="text-center" style="width: 160px;">ERGEBNIS / TIPP</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="small">
+                        @foreach (var game in Model.Games.OrderBy(g => g.KickOff))
+                        {
+                            var mNr = game.MatchNumber ?? 0;
+                            var displayRunde = game.Group?.Name ?? "-";
+                            var isBeforeKickoff = DateTimeOffset.UtcNow < game.KickOff;
+
+                            if (mNr >= 73)
+                            {
+                                displayRunde = mNr switch
+                                {
+                                    >= 73 and <= 88 => "1/16",
+                                    >= 89 and <= 96 => "1/8",
+                                    >= 97 and <= 100 => "1/4",
+                                    101 or 102 => "1/2",
+                                    103 => "P3",
+                                    104 => "Finale",
+                                    _ => displayRunde
+                                };
+                            }
+
+                            <tr class="border-bottom border-black border-opacity-10">
+                                <td class="ps-3 fw-bold text-success" style="color: #1b5e20 !important;">
+                                    #@mNr
+                                </td>
+
+                                <td class="fw-bold text-dark">
+                                    @(game.KickOff == default ? "-" : game.KickOff.ToLocalTime().ToString("dd.MM. HH:mm"))
+                                </td>
+
+                                <td class="text-dark nowrap-column">
+                                    <i class="bi bi-geo-alt small opacity-50 me-1"></i>@(game.Venue ?? "-")
+                                </td>
+
+                                <td class="text-center">
+                                    <span class="round-badge-pill">@displayRunde</span>
+                                </td>
+
+                                <td>
+                                    <div class="d-flex align-items-center justify-content-center w-100">
+                                        <div class="text-end d-flex align-items-center justify-content-end" style="flex: 1;">
+                                            <span class="fw-bold text-dark">
+                                                @(string.IsNullOrEmpty(game.HomeTeamName) ? GameHelper.GetPlaceholderName(game.MatchNumber, true) : GameHelper.FixTeamName(game.HomeTeamName))
+                                            </span>
+                                            @if (!string.IsNullOrEmpty(game.HomeTeamName))
+                                            {
+                                                <span class="fi @FlagHelper.GetFlagClass(game.HomeTeamName) ms-2 shadow-sm"></span>
+                                            }
+                                        </div>
+
+                                        <div class="text-dark opacity-50 fw-light text-center small mx-2" style="width: 25px;">vs.</div>
+
+                                        <div class="text-start d-flex align-items-center justify-content-start" style="flex: 1;">
+                                            @if (!string.IsNullOrEmpty(game.AwayTeamName))
+                                            {
+                                                <span class="fi @FlagHelper.GetFlagClass(game.AwayTeamName) me-2 shadow-sm"></span>
+                                            }
+                                            <span class="fw-bold text-dark">
+                                                @(string.IsNullOrEmpty(game.AwayTeamName) ? GameHelper.GetPlaceholderName(game.MatchNumber, false) : GameHelper.FixTeamName(game.AwayTeamName))
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="text-center">
+                                    @if (game.HomeTeamScore.HasValue)
+                                    {
+                                        <div class="d-flex flex-column align-items-center">
+                                            <span class="result-badge text-white shadow-sm mb-1" style="background-color: #1b5e20;">
+                                                @game.HomeTeamScore : @game.AwayTeamScore
+                                            </span>
+                                            <small class="text-muted" style="font-size: 0.65rem;">Endergebnis</small>
+                                        </div>
+                                    }
+                                    else if (isBeforeKickoff)
+                                    {
+                                        @if (User.Identity?.IsAuthenticated == true)
+                                        {
+                                            <div class="d-flex justify-content-center align-items-center gap-1 tip-container" 
+                                                 data-kickoff="@game.KickOff.ToUnixTimeMilliseconds()">
+                                                <input type="number" class="tip-input tip-field"
+                                                       data-side="home" data-gameid="@game.Id"
+                                                       value="@game.UserTipHome" placeholder="0" min="0" />
+
+                                                <span class="fw-bold text-success">:</span>
+
+                                                <input type="number" class="tip-input tip-field"
+                                                       data-side="away" data-gameid="@game.Id"
+                                                       value="@game.UserTipAway" placeholder="0" min="0" />
+
+                                                <button class="btn btn-sm btn-outline-success border-0 p-1 ms-1 save-tip-btn"
+                                                        onclick="saveSingleTip(this, '@game.Id')"
+                                                        title="Tipp speichern" style="display: none;">
+                                                    <i class="bi bi-cloud-arrow-up-fill fs-5"></i>
+                                                </button>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="d-flex flex-column align-items-center">
+                                                <a asp-controller="Account" asp-action="Login" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.7rem;">
+                                                    Login zum Tippen
+                                                </a>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="d-flex flex-column align-items-center opacity-75">
+                                            <span class="result-badge bg-white text-muted border border-success-subtle shadow-sm">
+                                                <i class="bi bi-hourglass-split me-1"></i> - : -
+                                            </span>
+                                            <small class="text-danger fw-bold" style="font-size: 0.65rem;">Anpfiff erfolgt - Gesperrt</small>
+                                            @if (game.UserTipHome.HasValue)
+                                            {
+                                                <small class="text-muted" style="font-size: 0.6rem;">Dein Tipp: @game.UserTipHome:@game.UserTipAway</small>
+                                            }
+                                        </div>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    // Event-Listener: Zeige Speicher-Button bei Änderung
+    document.addEventListener('input', function (e) {
+        if (e.target.classList.contains('tip-field')) {
+            const container = e.target.closest('.tip-container');
+            const btn = container.querySelector('.save-tip-btn');
+            btn.style.display = 'inline-block';
+            btn.classList.add('text-warning');
+        }
+    });
+
+    async function saveSingleTip(btn, gameId) {
+        const container = btn.closest('.tip-container');
+        const h = container.querySelector('[data-side="home"]').value;
+        const a = container.querySelector('[data-side="away"]').value;
+
+        if (h === "" || a === "") return;
+
+        // Zusätzlicher Check: Ist der Anpfiff bereits erfolgt?
+        const kickoff = container.getAttribute('data-kickoff');
+        if (kickoff && Date.now() >= parseInt(kickoff)) {
+            alert("Das Spiel hat bereits begonnen. Tippen nicht mehr möglich.");
+            location.reload();
+            return;
+        }
+
+        // Loading State
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/Tips/SaveInlineTip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    gameId: gameId,
+                    homeScore: parseInt(h),
+                    awayScore: parseInt(a)
+                })
+            });
+
+            if (response.ok) {
+                btn.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+                btn.classList.replace('text-warning', 'text-success');
+                setTimeout(() => {
+                    btn.style.display = 'none';
+                    btn.disabled = false;
+                    btn.classList.remove('text-success');
+                    btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill fs-5"></i>';
+                }, 2000);
+            } else {
+                const errorText = await response.text();
+                if (errorText.includes("bereits begonnen")) {
+                    alert(errorText);
+                    location.reload();
+                } else {
+                    throw new Error();
+                }
+            }
+        } catch (err) {
+            btn.innerHTML = '<i class="bi bi-exclamation-triangle text-danger"></i>';
+            btn.disabled = false;
+        }
+    }
+
+    // Periodischer Check, ob Spiele begonnen haben (alle 30 Sek)
+    setInterval(() => {
+        const now = Date.now();
+        document.querySelectorAll('.tip-container[data-kickoff]').forEach(container => {
+            const kickoff = parseInt(container.getAttribute('data-kickoff'));
+            if (now >= kickoff) {
+                // Seite neu laden oder UI dynamisch sperren
+                // Da das UI-Update serverseitig komplex ist (Endergebnis vs. nur gesperrt), 
+                // laden wir die Seite einfach neu, wenn ein Spiel "live" geht.
+                location.reload();
+            }
+        });
+    }, 30000);
+</script>

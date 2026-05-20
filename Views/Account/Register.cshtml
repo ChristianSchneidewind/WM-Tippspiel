@@ -1,0 +1,143 @@
+@model TippSpiel.Models.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Registrierung";
+}
+
+<style>
+    /* 1. Fokus-Effekt: Verhindert den schwarzen Standard-Rahmen */
+    .form-control:focus {
+        border-color: #2d5a27 !important;
+        box-shadow: 0 0 0 0.25rem rgba(45, 90, 39, 0.25) !important;
+        outline: none !important;
+        background-color: #fff !important;
+    }
+
+    /* 2. Styling für die Custom Input Group */
+    .custom-input-group {
+        border: 1px solid #ced4da;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease-in-out;
+        overflow: hidden;
+        background-color: #f8f9fa;
+    }
+
+        /* Leuchteffekt für die gesamte Gruppe beim Fokus */
+        .custom-input-group:focus-within {
+            border-color: #0c2b18 !important;
+            box-shadow: 0 0 0 0.25rem rgba(12, 43, 24, 0.15);
+            background-color: #fff !important;
+        }
+
+    .input-group-text {
+        color: #6c757d;
+        font-size: 1.1rem;
+    }
+
+    /* 3. Button & Card Styling */
+    .btn-register {
+        background-color: #0c2b18;
+        border: none;
+        border-radius: 0.5rem;
+        padding: 12px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+        .btn-register:hover {
+            filter: brightness(1.2);
+            transform: translateY(-1px);
+        }
+
+    .register-card {
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow border-0 register-card">
+
+                <div class="card-header border-0 text-white text-center py-4" style="background-color: #0c2b18;">
+                    <h2 class="h4 mb-0">Konto erstellen</h2>
+                </div>
+
+                <div class="card-body p-4 bg-white">
+                    <form asp-action="Register" method="post">
+                        <input type="hidden" asp-for="ReturnUrl" />
+
+                        @* Benutzername *@
+                        <div class="mb-3">
+                            <label asp-for="UserName" class="form-label fw-bold small text-muted text-uppercase">Benutzername</label>
+                            <div class="input-group custom-input-group">
+                                <span class="input-group-text border-0 bg-transparent"><i class="bi bi-person-fill"></i></span>
+                                <input asp-for="UserName" class="form-control border-0 shadow-none bg-transparent" placeholder="Wähle einen Namen" autofocus />
+                            </div>
+                            <span asp-validation-for="UserName" class="text-danger small"></span>
+                        </div>
+
+                        @* E-Mail *@
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold small text-muted text-uppercase">E-Mail Adresse</label>
+                            <div class="input-group custom-input-group">
+                                <span class="input-group-text border-0 bg-transparent"><i class="bi bi-envelope-fill"></i></span>
+                                <input asp-for="Email" type="email" class="form-control border-0 shadow-none bg-transparent" placeholder="beispiel@mail.de" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        @* Passwort *@
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-bold small text-muted text-uppercase">Passwort</label>
+                            <div class="input-group custom-input-group">
+                                <span class="input-group-text border-0 bg-transparent"><i class="bi bi-lock-fill"></i></span>
+                                <input asp-for="Password" type="password" class="form-control border-0 shadow-none bg-transparent" placeholder="••••••••" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        @* Passwort Bestätigung *@
+                        <div class="mb-4">
+                            <label asp-for="ConfirmPassword" class="form-label fw-bold small text-muted text-uppercase">Passwort bestätigen</label>
+                            <div class="input-group custom-input-group">
+                                <span class="input-group-text border-0 bg-transparent"><i class="bi bi-shield-check"></i></span>
+                                <input asp-for="ConfirmPassword" type="password" class="form-control border-0 shadow-none bg-transparent" placeholder="••••••••" />
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+
+                        @* Admin-Bereich *@
+                        <div class="p-3 border rounded-3 mb-4 bg-light">
+                            <div class="form-check mb-2">
+                                <input asp-for="IsAdmin" class="form-check-input" />
+                                <label asp-for="IsAdmin" class="form-check-label small fw-bold text-muted">Als Admin registrieren?</label>
+                            </div>
+                            <div>
+                                <label asp-for="AdminCode" class="form-label small text-muted mb-1 text-uppercase">Admin-Code</label>
+                                <input asp-for="AdminCode" class="form-control bg-white" placeholder="Sicherheits-Code" />
+                                <span asp-validation-for="AdminCode" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="text-danger small mb-3" asp-validation-summary="ModelOnly"></div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-lg btn-register text-white shadow-sm">
+                                Registrierung abschließen
+                            </button>
+                            <a asp-action="Login" class="btn btn-link btn-sm text-muted text-decoration-none mt-2">
+                                Bereits Mitglied? <span style="color: #0c2b18;" class="fw-bold">Zum Login</span>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

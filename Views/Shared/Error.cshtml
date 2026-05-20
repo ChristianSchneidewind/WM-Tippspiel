@@ -1,0 +1,48 @@
+﻿@model TippSpiel.Models.ErrorViewModel
+@{
+    ViewData["Title"] = "Fehler";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0" style="border-radius: 1rem; overflow: hidden;">
+            <div class="card-header bg-danger text-white py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-octagon-fill fs-4"></i>
+                    <h2 class="h5 mb-0">Hoppla! Da ist etwas schiefgelaufen.</h2>
+                </div>
+            </div>
+            <div class="card-body p-5 text-center">
+                <h1 class="display-1 text-danger-emphasis fw-bold">Error</h1>
+                <p class="lead text-muted">Ein Fehler ist bei der Verarbeitung Ihrer Anfrage aufgetreten.</p>
+
+                @if (Model != null && Model.ShowRequestId)
+                {
+                    <div class="bg-light p-3 rounded-3 mb-4">
+                        <small class="text-uppercase fw-bold text-muted d-block mb-1">Request ID</small>
+                        <code class="fs-5 text-dark">@Model.RequestId</code>
+                    </div>
+                }
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary px-4 rounded-pill">
+                        <i class="bi bi-arrow-left me-1"></i> Zurück
+                    </a>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-success px-4 rounded-pill"
+                           style="background-color: var(--bs-success-text-emphasis);">
+                        <i class="bi bi-house me-1"></i> Startseite
+                    </a>
+                </div>
+            </div>
+
+            @* Dieser Teil wird nur angezeigt, wenn du lokal entwickelst *@
+            <div class="card-footer bg-light border-0 p-4">
+                <h3 class="h6 fw-bold">Development Mode</h3>
+                <p class="small text-muted mb-0">
+                    Im <strong>Development</strong> Modus werden detaillierte Informationen zum Fehler angezeigt.
+                    In einer Live-Umgebung sollte dieser Modus deaktiviert bleiben, um keine sensiblen Daten preiszugeben.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,228 @@
+@model TippSpiel.Models.ViewModels.HomeIndexViewModel
+@using TippSpiel.Helpers
+@{
+    ViewData["Title"] = "Start";
+}
+
+<style>
+    /* --- ALLGEMEINE HERO STYLES --- */
+    .hero-floating-container {
+        max-width: 1000px;
+    }
+
+    .btn-hero-tippen {
+        background-color: #0c2b18;
+        color: white;
+        padding: 15px 40px;
+        font-size: 1.25rem;
+        font-weight: 800;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        border: none;
+        letter-spacing: 2px;
+    }
+
+        .btn-hero-tippen:hover {
+            background-color: #198754;
+            transform: scale(1.05);
+            color: white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+    /* --- GAME CARD DESIGN (Skizzen-Optimiert) --- */
+    .game-card {
+        background: #ffffff;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid #dee2e6;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
+            border-color: #198754;
+        }
+
+    /* Oben: Zeit & Gruppe (Grün) */
+    .game-card-header {
+        background-color: #198754;
+        color: white;
+        padding: 10px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+        font-size: 0.8rem;
+    }
+
+    /* Mitte: Paarung (Dezent Grau) */
+    .game-card-body-gray {
+        background-color: #f8f9fa; /* BS Light Grau */
+        padding: 1.5rem 1rem;
+        border-bottom: 1px solid #eee;
+        flex-grow: 1;
+    }
+
+    .venue-text {
+        font-size: 0.7rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .vs-divider {
+        font-weight: 900;
+        color: #dee2e6;
+        font-size: 0.9rem;
+    }
+
+    /* Unten: Button (Volle Breite) */
+    .btn-tipp-full {
+        background-color: #ffffff;
+        color: #198754;
+        border: none;
+        padding: 12px;
+        width: 100%;
+        font-weight: bold;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: block;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        text-align: center;
+    }
+
+        .btn-tipp-full:hover {
+            background-color: #198754;
+            color: #ffffff;
+        }
+</style>
+
+@* --- HERO BEREICH --- *@
+<div class="text-center mb-5 mt-5">
+    <div class="hero-floating-container mx-auto">
+        <div class="mb-5 d-flex justify-content-center align-items-center" style="min-height: 300px;">
+            <img src="/Images/dynamicball.png"
+                 alt="WM Ball"
+                 class="img-fluid"
+                 style="width: 100%; max-width: 800px; height: auto; display: block; border-radius: 1.5rem"
+                 onerror="this.style.display='none';">
+        </div>
+
+        <div class="mt-4">
+            <a class="btn btn-hero-tippen shadow-lg"
+               asp-controller="Home" asp-action="Schedule">
+                JETZT TIPPEN
+            </a>
+        </div>
+    </div>
+</div>
+
+@* --- SEKTION: DIE NÄCHSTEN 3 PARTIEN --- *@
+@if (Model.UpcomingGames != null && Model.UpcomingGames.Any())
+{
+    <div class="mb-5">
+        <div class="d-flex align-items-center mb-4">
+            <div class="flex-grow-1 opacity-25"><hr class="text-white"></div>
+            <div class="px-3 fw-bold text-uppercase text-white small" style="letter-spacing: 3px; text-shadow: 1px 1px 4px rgba(0,0,0,0.5);">
+                <i class="bi bi-clock-history me-2"></i>Anstehende Spiele
+            </div>
+            <div class="flex-grow-1 opacity-25"><hr class="text-white"></div>
+        </div>
+
+        <div class="row g-3">
+            @foreach (var game in Model.UpcomingGames.Take(3))
+            {
+                <div class="col-12 col-md-4">
+                    <div class="game-card shadow-sm h-100">
+
+                        @* 1. Header: Zeit & Gruppe *@
+                        <div class="game-card-header">
+                            <span><i class="bi bi-calendar3 me-1"></i> @game.KickOff.ToLocalTime().ToString("dd.MM. | HH:mm")</span>
+                            <span class="small opacity-75">GRUPPE @game.GroupName</span>
+                        </div>
+
+                        @* 2. Mitte: Flaggen auf Grau *@
+                        <div class="game-card-body-gray text-center">
+                            @if (!string.IsNullOrEmpty(game.Venue))
+                            {
+                                <span class="venue-text">
+                                    <i class="bi bi-geo-alt"></i> @game.Venue
+                                </span>
+                            }
+
+                            <div class="d-flex align-items-center justify-content-between px-2">
+                                <div style="width: 42%;">
+                                    <span class="fi @FlagHelper.GetFlagClass(game.HomeTeam) fs-1 mb-2 d-block mx-auto shadow-sm" style="border-radius: 4px;"></span>
+                                    <div class="fw-bold text-dark text-truncate small">@game.HomeTeam</div>
+                                </div>
+
+                                <div class="vs-divider">VS</div>
+
+                                <div style="width: 42%;">
+                                    <span class="fi @FlagHelper.GetFlagClass(game.AwayTeam) fs-1 mb-2 d-block mx-auto shadow-sm" style="border-radius: 4px;"></span>
+                                    <div class="fw-bold text-dark text-truncate small">@game.AwayTeam</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* 3. Footer: Button *@
+                        <a asp-controller="Home" asp-action="Schedule" class="btn-tipp-full">
+                            Tipp abgeben <i class="bi bi-chevron-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@* --- DASHBOARD NAVIGATION (KACHELN) --- *@
+<div class="row g-4 mb-5">
+    @* Gruppen *@
+    <div class="col-12 col-md-4">
+        <div class="card h-100 shadow-sm border-0" style="border-radius: 1rem;">
+            <div class="card-body d-flex flex-column p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title fw-bold" style="color: #0c2b18;">Gruppen</h5>
+                    <span class="badge rounded-pill px-3 py-2" style="background-color: #198754;">@Model.GroupCount</span>
+                </div>
+                <p class="card-text text-muted small">Tabelle und Standings aller Gruppen einsehen.</p>
+                <a class="btn btn-outline-success mt-auto rounded-pill fw-bold" asp-controller="Home" asp-action="Groups">Zur Übersicht</a>
+            </div>
+        </div>
+    </div>
+
+    @* Spielplan *@
+    <div class="col-12 col-md-4">
+        <div class="card h-100 shadow-sm border-0" style="border-radius: 1rem;">
+            <div class="card-body d-flex flex-column p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title fw-bold" style="color: #0c2b18;">Spielplan</h5>
+                    <span class="badge rounded-pill px-3 py-2" style="background-color: #198754;">@Model.GameCount</span>
+                </div>
+                <p class="card-text text-muted small">Alle Termine und Ergebnisse im Überblick.</p>
+                <a class="btn btn-outline-success mt-auto rounded-pill fw-bold" asp-controller="Home" asp-action="Schedule">Zum Spielplan</a>
+            </div>
+        </div>
+    </div>
+
+    @* Rankings *@
+    <div class="col-12 col-md-4">
+        <div class="card h-100 shadow-sm border-0" style="border-radius: 1rem;">
+            <div class="card-body d-flex flex-column p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title fw-bold" style="color: #0c2b18;">Rankings</h5>
+                    <span class="badge rounded-pill px-3 py-2" style="background-color: #198754;">@Model.TippCount</span>
+                </div>
+                <p class="card-text text-muted small">Wer führt die Tabelle an? Jetzt Punktestand prüfen.</p>
+                <a class="btn btn-outline-success mt-auto rounded-pill fw-bold" asp-controller="Home" asp-action="Rankings">Zu den Rankings</a>
+            </div>
+        </div>
+    </div>
+</div>
