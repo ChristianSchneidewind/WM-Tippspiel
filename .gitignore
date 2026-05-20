@@ -1,63 +1,84 @@
 # =========================
 # Build-Ergebnisse
-# =========================bin/
+# =========================
+bin/
 obj/
 out/
+
 # =========================
-# Visual Studio / Rider / VS Code
-# =========================.vs/
+# Visual Studio / IDE
+# =========================
+.vs/
 .vscode/
 .idea/
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
+
 # =========================
 # .NET Core
-# =========================project.lock.json
+# =========================
+project.lock.json
 project.fragment.lock.json
 artifacts/
+
 # =========================
 # Logs & temporäre Dateien
-# =========================*.log
+# =========================
+*.log
 *.tmp
 *.temp
+
 # =========================
 # Publish-Ordner
-# =========================publish/
-wwwroot/lib/
+# =========================
+publish/
+
+# ⚠️ WICHTIG:
+# wwwroot/lib NICHT ignorieren → sonst fehlt Bootstrap!!
+# wwwroot/lib/   <-- ENTFERNT
+
 # =========================
 # Test-Ergebnisse
-# =========================TestResults/
+# =========================
+TestResults/
 coverage/
 coverage.*
+
 # =========================
 # NuGet
-# =========================*.nupkg
+# =========================
+*.nupkg
 *.snupkg
 .nuget/packages/
 .nuget/package.cache
+
 # =========================
-# Secrets / Konfig
-# =========================appsettings.Development.json
+# Secrets / lokale Config
+# =========================
+appsettings.Development.json
 appsettings.Local.json
 secrets.json
+
 # =========================
 # Datenbanken
-# =========================*.mdf
+# =========================
+*.mdf
 *.ldf
-*.db
+*.db*
 *.sqlite
+
 # =========================
 # OS-Dateien
-# =========================.DS_Store
+# =========================
+.DS_Store
 Thumbs.db
 desktop.ini
+
 # =========================
 # Backup-Dateien
-# =========================*.bak
+# =========================
+*.bak
 *.old
 *.orig
-
- 
- 
