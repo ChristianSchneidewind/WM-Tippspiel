@@ -195,3 +195,89 @@
     </div>
 
 </div>
+
+<div class="row g-4 mt-1">
+
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header text-white bg-success">
+                <strong>Fairste Mannschaften</strong>
+            </div>
+
+            <div class="card-body">
+                @if (!Model.FairestTeams.Any())
+                {
+                    <div class="text-muted">Noch keine Fairplay-Daten vorhanden.</div>
+                }
+                else
+                {
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Team</th>
+                                <th class="text-center">Gelb</th>
+                                <th class="text-center">Rot</th>
+                                <th class="text-center">Fairplay-Punkte</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var team in Model.FairestTeams)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@team.TeamName</td>
+                                    <td class="text-center">@team.YellowCards</td>
+                                    <td class="text-center">@team.RedCards</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-success rounded-pill">@team.FairplayPoints</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header text-white bg-danger">
+                <strong>Unfairste Mannschaften</strong>
+            </div>
+
+            <div class="card-body">
+                @if (!Model.UnfairestTeams.Any())
+                {
+                    <div class="text-muted">Noch keine Fairplay-Daten vorhanden.</div>
+                }
+                else
+                {
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Team</th>
+                                <th class="text-center">Gelb</th>
+                                <th class="text-center">Rot</th>
+                                <th class="text-center">Fairplay-Punkte</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var team in Model.UnfairestTeams)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@team.TeamName</td>
+                                    <td class="text-center">@team.YellowCards</td>
+                                    <td class="text-center">@team.RedCards</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-danger rounded-pill">@team.FairplayPoints</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>
