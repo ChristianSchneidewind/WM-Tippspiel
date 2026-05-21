@@ -108,6 +108,43 @@ namespace TippSpiel.Controllers
                 .OrderByDescending(x => x.Count)
                 .Take(10)
                 .ToListAsync();
+
+            var teamFairplayStats = await _db.Teams
+    .Select(team => new TeamStatisticViewModel
+    {
+        TeamId = team.Id,
+        TeamName = team.Name,
+
+        YellowCards = _db.MatchEvents
+            .Count(e => e.Player != null &&
+                        e.Player.TeamId == team.Id &&
+                        e.EventType == "YellowCard"),
+
+        RedCards = _db.MatchEvents
+            .Count(e => e.Player != null &&
+                        e.Player.TeamId == team.Id &&
+                        e.EventType == "RedCard")
+    })
+    .ToListAsync();
+
+            foreach (var team in teamFairplayStats)
+            {
+                team.FairplayPoints = team.YellowCards + team.RedCards * 3;
+            }
+
+            vm.FairestTeams = teamFairplayStats
+                .Where(t => t.YellowCards > 0 || t.RedCards > 0)
+                .OrderBy(t => t.FairplayPoints)
+                .ThenBy(t => t.YellowCards)
+                .Take(5)
+                .ToList();
+
+            vm.UnfairestTeams = teamFairplayStats
+                .Where(t => t.YellowCards > 0 || t.RedCards > 0)
+                .OrderByDescending(t => t.FairplayPoints)
+                .ThenByDescending(t => t.RedCards)
+                .Take(5)
+                .ToList();
         }
 
 

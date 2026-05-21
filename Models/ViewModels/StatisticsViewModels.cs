@@ -6,6 +6,8 @@
         public List<PlayerStatisticViewModel> TopAssists { get; set; } = new();
         public List<PlayerStatisticViewModel> YellowCards { get; set; } = new();
         public List<PlayerStatisticViewModel> RedCards { get; set; } = new();
+        public List<TeamStatisticViewModel> FairestTeams { get; set; } = new();
+        public List<TeamStatisticViewModel> UnfairestTeams { get; set; } = new();
 
         public List<TeamStatisticViewModel> TeamStatistics { get; set; } = new();
     }
@@ -27,5 +29,6 @@
         public int Assists { get; set; }
         public int YellowCards { get; set; }
         public int RedCards { get; set; }
+        public int FairplayPoints { get; set; }
     }
 }
