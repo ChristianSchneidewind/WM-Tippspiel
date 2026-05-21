@@ -1,0 +1,118 @@
+﻿@model TippSpiel.Models.ViewModels.UserProfileViewModel
+
+@{
+    ViewData["Title"] = "Mein Profil";
+}
+
+<style>
+    .save-tip-btn {
+        transition: opacity 0.3s, transform 0.2s;
+    }
+
+        .save-tip-btn:hover {
+            transform: scale(1.2);
+        }
+</style>
+
+<h1 class="mb-4">Mein Profil</h1>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Benutzer</h5>
+                <p class="card-text fs-4">@Model.UserName</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Punkte</h5>
+                <p class="card-text fs-4">@Model.TotalPoints</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Ranking</h5>
+                <p class="card-text fs-4">Platz @Model.Rank</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="mb-3">Meine Tipps</h2>
+
+@if (!Model.Tips.Any())
+{
+    <div class="alert alert-info">
+        Du hast noch keine Tipps abgegeben.
+    </div>
+}
+else
+{
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Datum</th>
+                <th>Spiel</th>
+                <th>Dein Tipp</th>
+                <th>Ergebnis</th>
+                <th>Punkte</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tip in Model.Tips)
+            {
+                <tr>
+                    <td>@tip.KickOff.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@tip.HomeTeam - @tip.AwayTeam</td>
+                    <td>
+                        @if (tip.CanEdit)
+                        {
+                            <form asp-controller="Profile" asp-action="UpdateTip" method="post" class="d-flex align-items-center gap-2">
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden" name="tipId" value="@tip.TipId" />
+
+                                <input type="number" name="homeTeamTipp" value="@tip.HomeTeamTipp" min="0" max="100"
+                                       class="form-control form-control-sm" style="width: 70px;" />
+
+                                <span>:</span>
+
+                                <input type="number" name="awayTeamTipp" value="@tip.AwayTeamTipp" min="0" max="100"
+                                       class="form-control form-control-sm" style="width: 70px;" />
+
+                                <button type="submit"
+                                        class="btn btn-sm btn-outline-success border-0 p-1 ms-1 save-tip-btn"
+                                        title="Tipp speichern">
+                                    <i class="bi bi-cloud-arrow-up-fill fs-5"></i>
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span>@tip.HomeTeamTipp : @tip.AwayTeamTipp</span>
+                            <span class="badge bg-secondary ms-2">Gesperrt</span>
+                        }
+                    </td>
+                    <td>
+                        @if (tip.HomeTeamScore.HasValue && tip.AwayTeamScore.HasValue)
+                        {
+                            <span>@tip.HomeTeamScore : @tip.AwayTeamScore</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Noch offen</span>
+                        }
+                    </td>
+                    <td>@tip.Points</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

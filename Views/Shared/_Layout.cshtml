@@ -48,6 +48,10 @@
                             <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Rankings" ? "active" : "")"
                                asp-controller="Home" asp-action="Rankings">Rankings</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Profile" ? "active" : "")"
+                               asp-controller="Profile" asp-action="Index">Profil</a>
+                        </li>
                     </ul>
 
                     <div class="d-flex align-items-center">
