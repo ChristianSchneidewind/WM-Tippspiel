@@ -23,11 +23,40 @@ namespace TippSpiel.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var currentUser = await _userManager.GetUserAsync(User);
 
-            if (user == null)
+            if (currentUser == null)
             {
                 return Unauthorized();
+            }
+
+            return await BuildProfileView(currentUser.Id);
+        }
+
+        public async Task<IActionResult> Details(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return NotFound();
+            }
+
+            return await BuildProfileView(id);
+        }
+
+        private async Task<IActionResult> BuildProfileView(string profileUserId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if (currentUser == null)
+            {
+                return Unauthorized();
+            }
+
+            var profileUser = await _userManager.FindByIdAsync(profileUserId);
+
+            if (profileUser == null)
+            {
+                return NotFound();
             }
 
             var ranking = await _db.Users
@@ -41,52 +70,58 @@ namespace TippSpiel.Controllers
                 .OrderByDescending(x => x.Points)
                 .ToListAsync();
 
-            var userRankingEntry = ranking.FirstOrDefault(x => x.UserId == user.Id);
+            var userRankingEntry = ranking.FirstOrDefault(x => x.UserId == profileUser.Id);
 
             var rank = userRankingEntry == null
                 ? 0
-                : ranking.FindIndex(x => x.UserId == user.Id) + 1;
+                : ranking.FindIndex(x => x.UserId == profileUser.Id) + 1;
 
             var totalPoints = userRankingEntry?.Points ?? 0;
 
             var dbTips = await _db.Tipps
-                .Where(t => t.UserId == user.Id)
+                .Where(t => t.UserId == profileUser.Id)
                 .Include(t => t.Game)
-                .ThenInclude(g => g!.HomeTeam)
+                    .ThenInclude(g => g!.HomeTeam)
                 .Include(t => t.Game)
-                .ThenInclude(g => g!.AwayTeam)
+                    .ThenInclude(g => g!.AwayTeam)
                 .ToListAsync();
 
             dbTips = dbTips
                 .OrderBy(t => t.Game!.KickOff)
                 .ToList();
 
+            var isOwnProfile = currentUser.Id == profileUser.Id;
+
             var tips = dbTips
                 .Select(t => new UserTipProfileViewModel
-            {
-                TipId = t.Id,
-                GameId = t.GameId,
-                KickOff = t.Game!.KickOff,
-                HomeTeam = GameHelper.FixTeamName(t.Game.HomeTeamName),
-                AwayTeam = GameHelper.FixTeamName(t.Game.AwayTeamName),
-                HomeTeamTipp = t.HomeTeamTipp,
-                AwayTeamTipp = t.AwayTeamTipp,
-                HomeTeamScore = t.Game.HomeTeamScore,
-                AwayTeamScore = t.Game.AwayTeamScore,
-                Points = t.points,
-                CanEdit = DateTimeOffset.UtcNow < t.Game.KickOff
-            })
+                {
+                    TipId = t.Id,
+                    GameId = t.GameId,
+                    KickOff = t.Game!.KickOff,
+                    HomeTeam = GameHelper.FixTeamName(t.Game.HomeTeamName),
+                    AwayTeam = GameHelper.FixTeamName(t.Game.AwayTeamName),
+                    HomeTeamTipp = t.HomeTeamTipp,
+                    AwayTeamTipp = t.AwayTeamTipp,
+                    HomeTeamScore = t.Game.HomeTeamScore,
+                    AwayTeamScore = t.Game.AwayTeamScore,
+                    Points = t.points,
+
+                    // Bearbeiten nur im eigenen Profil und nur vor Anpfiff
+                    CanEdit = isOwnProfile && DateTimeOffset.UtcNow < t.Game.KickOff
+                })
                 .ToList();
 
-             var vm = new UserProfileViewModel
+            var vm = new UserProfileViewModel
             {
-                UserName = user.UserName ?? "Unbekannt",
+                UserId = profileUser.Id,
+                UserName = profileUser.UserName ?? "Unbekannt",
                 TotalPoints = totalPoints,
                 Rank = rank,
+                IsOwnProfile = isOwnProfile,
                 Tips = tips
             };
 
-            return View(vm);
+            return View("Index", vm);
         }
 
         [HttpPost]

@@ -14,7 +14,9 @@
         }
 </style>
 
-<h1 class="mb-4">Mein Profil</h1>
+<h1 class="mb-4">
+    @(Model.IsOwnProfile ? "Mein Profil" : $"Profil von {Model.UserName}")
+</h1>
 
 <div class="row mb-4">
     <div class="col-md-4">

@@ -124,7 +124,12 @@ else
                                              style="width: 35px; height: 35px; font-size: 0.8rem; color: var(--bs-success-text-emphasis);">
                                             @entry.UserName.Substring(0, Math.Min(2, entry.UserName.Length)).ToUpper()
                                         </div>
-                                        <span class="fw-bold text-dark">@entry.UserName</span>
+                                        <a asp-controller="Profile"
+                                           asp-action="Details"
+                                           asp-route-id="@entry.UserId"
+                                           class="fw-bold text-dark text-decoration-none">
+                                            @entry.UserName
+                                        </a>
                                     </div>
                                 </td>
                                 <td class="text-center">

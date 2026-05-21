@@ -2,9 +2,11 @@
 {
     public class UserProfileViewModel
     {
+        public string UserId { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
         public int TotalPoints { get; set; }
         public int Rank { get; set; }
+        public bool IsOwnProfile { get; set; }
         public List<UserTipProfileViewModel> Tips { get; set; } = new();
     }
 
