@@ -76,10 +76,14 @@ else
                                 <div class="d-flex flex-wrap gap-2">
                                     @foreach (var team in group.Teams)
                                     {
-                                        <span class="badge rounded-pill px-3 py-2 fw-medium shadow-sm"
-                                              style="background-color: var(--bs-success-text-emphasis); font-size: 0.85rem;">
-                                            <span class="fi @FlagHelper.GetFlagClass(team) me-1"></span> @team
-                                        </span>
+                                        <a asp-controller="Teams"
+                                           asp-action="Details"
+                                           asp-route-id="@team.Id"
+                                           class="badge rounded-pill px-3 py-2 fw-medium shadow-sm text-decoration-none"
+                                           style="background-color: var(--bs-success-text-emphasis); font-size: 0.85rem;">
+                                            <span class="fi @FlagHelper.GetFlagClass(team.Name) me-1"></span>
+                                            @GameHelper.FixTeamName(team.Name)
+                                        </a>
                                     }
                                 </div>
                             </div>

@@ -40,7 +40,7 @@ namespace TippSpiel.Controllers
                 .Take(10)
                 .ToListAsync();
 
-            return View(vm);
+            
             
 
             // Top-Assists
@@ -110,22 +110,22 @@ namespace TippSpiel.Controllers
                 .ToListAsync();
 
             var teamFairplayStats = await _db.Teams
-    .Select(team => new TeamStatisticViewModel
-    {
-        TeamId = team.Id,
-        TeamName = team.Name,
+                .Select(team => new TeamStatisticViewModel
+                {
+                    TeamId = team.Id,
+                    TeamName = team.Name,
 
-        YellowCards = _db.MatchEvents
-            .Count(e => e.Player != null &&
+                    YellowCards = _db.MatchEvents
+                        .Count(e => e.Player != null &&
                         e.Player.TeamId == team.Id &&
                         e.EventType == "YellowCard"),
 
-        RedCards = _db.MatchEvents
-            .Count(e => e.Player != null &&
+                    RedCards = _db.MatchEvents
+                        .Count(e => e.Player != null &&
                         e.Player.TeamId == team.Id &&
                         e.EventType == "RedCard")
-    })
-    .ToListAsync();
+                })
+                .ToListAsync();
 
             foreach (var team in teamFairplayStats)
             {
@@ -143,10 +143,13 @@ namespace TippSpiel.Controllers
                 .Where(t => t.YellowCards > 0 || t.RedCards > 0)
                 .OrderByDescending(t => t.FairplayPoints)
                 .ThenByDescending(t => t.RedCards)
-                .Take(5)
+                .Take(5)         
                 .ToList();
-        }
+            
+            return View(vm);
 
+        }
+        
 
     }
 }

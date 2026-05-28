@@ -1,0 +1,74 @@
+﻿@using TippSpiel.Helpers
+@model TippSpiel.Models.Team
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<style>
+    .custom-border-green {
+        border-color: var(--bs-success-border-subtle) !important;
+    }
+
+    .tracking-wider {
+        letter-spacing: 0.05em;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 page-title-container">
+    <h1 class="display-6 page-title">
+        <span class="fi @FlagHelper.GetFlagClass(Model.Name) me-2 shadow-sm"></span>
+        @GameHelper.FixTeamName(Model.Name)
+    </h1>
+
+    <a asp-controller="Home" asp-action="Groups" class="btn btn-outline-success btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Zurück
+    </a>
+</div>
+
+<div class="card shadow-sm border-0 overflow-hidden mb-4" style="border-radius: 1rem;">
+    <div class="card-header border-0 text-white d-flex justify-content-between align-items-center py-3"
+         style="background-color: var(--bs-success-text-emphasis);">
+        <strong class="fs-4">Mannschaftsübersicht</strong>
+        <i class="bi bi-people-fill"></i>
+    </div>
+
+    <div class="card-body p-4">
+        <div class="fw-bold mb-3 small text-uppercase tracking-wider text-success-emphasis">
+            Spieler
+        </div>
+
+        @if (Model.Players?.Any() == true)
+        {
+            <div class="table-responsive rounded shadow-sm border border-2 custom-border-green">
+                <table class="table table-success table-striped align-middle mb-0"
+                       style="--bs-table-striped-bg: #c8e6c9; --bs-table-bg: #e8f5e9;">
+                    <thead style="background-color: var(--bs-success-text-emphasis);">
+                        <tr class="small text-white">
+                            <th class="ps-3">NAME</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        @foreach (var player in Model.Players.OrderBy(p => p.Name))
+                        {
+                            <tr>
+                                <td class="ps-3 fw-bold text-dark">
+                                    @player.Name
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="card bg-light border-0 shadow-sm">
+                <div class="card-body text-center text-muted">
+                    Für diese Mannschaft sind aktuell noch keine Spieler verfügbar.
+                    Die offiziellen Kader werden Anfang Juni ergänzt.
+                </div>
+            </div>
+        }
+    </div>
+</div>

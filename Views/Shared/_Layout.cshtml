@@ -37,6 +37,10 @@
                                asp-controller="Home" asp-action="Groups">Gruppen</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Teams" ? "active" : "")"
+                               asp-controller="Teams" asp-action="Index">Mannschaften</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Finals" ? "active" : "")"
                                asp-controller="Home" asp-action="Finals">Finalrunde</a>
                         </li>

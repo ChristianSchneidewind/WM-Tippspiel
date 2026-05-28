@@ -7,7 +7,7 @@ namespace TippSpiel.Models.ViewModels
     {
         public int GroupId { get; set; }
         public string GroupName { get; set; } = string.Empty;
-        public IReadOnlyList<string> Teams { get; set; } = new List<string>();
+        public IReadOnlyList<Team> Teams { get; set; } = new List<Team>();
         public IReadOnlyList<Game> Games { get; set; } = new List<Game>();
 
         // NEU: Hier fügen wir die Tabellenzeilen hinzu

@@ -1,0 +1,110 @@
+﻿@using TippSpiel.Helpers
+@model IReadOnlyList<TippSpiel.Models.Team>
+
+@{
+    ViewData["Title"] = "Mannschaften";
+}
+
+<style>
+    .custom-border-green {
+        border-color: var(--bs-success-border-subtle) !important;
+    }
+
+    .tracking-wider {
+        letter-spacing: 0.05em;
+    }
+
+    .team-toggle-button {
+        background-color: var(--bs-success-text-emphasis);
+        color: white;
+        border: none;
+    }
+
+        .team-toggle-button:hover,
+        .team-toggle-button:focus {
+            background-color: var(--bs-success-text-emphasis);
+            color: white;
+            filter: brightness(1.08);
+        }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 page-title-container">
+    <h1 class="display-6 page-title">Mannschaften</h1>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card bg-light border-0 shadow-sm">
+        <div class="card-body text-center text-muted">Noch keine Mannschaften vorhanden.</div>
+    </div>
+}
+else
+{
+    <div class="accordion d-flex flex-column gap-3" id="teamsAccordion">
+        @foreach (var team in Model)
+        {
+            var collapseId = $"team-{team.Id}";
+
+            <div class="card shadow-sm border-0 overflow-hidden" style="border-radius: 1rem;">
+                <button class="team-toggle-button w-100 text-start py-3 px-4 d-flex justify-content-between align-items-center"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#@collapseId"
+                        aria-expanded="false"
+                        aria-controls="@collapseId">
+
+                    <span class="fw-bold fs-5">
+                        <span class="fi @FlagHelper.GetFlagClass(team.Name) me-2 shadow-sm"></span>
+                        @GameHelper.FixTeamName(team.Name)
+                    </span>
+
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+
+                <div id="@collapseId"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#teamsAccordion">
+
+                    <div class="card-body p-4">
+                        <div class="fw-bold mb-3 small text-uppercase tracking-wider text-success-emphasis">
+                            Spieler
+                        </div>
+
+                        @if (team.Players?.Any() == true)
+                        {
+                            <div class="table-responsive rounded shadow-sm border border-2 custom-border-green">
+                                <table class="table table-success table-striped align-middle mb-0"
+                                       style="--bs-table-striped-bg: #c8e6c9; --bs-table-bg: #e8f5e9;">
+                                    <thead style="background-color: var(--bs-success-text-emphasis);">
+                                        <tr class="small text-white">
+                                            <th class="ps-3">NAME</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="small">
+                                        @foreach (var player in team.Players.OrderBy(p => p.Name))
+                                        {
+                                            <tr>
+                                                <td class="ps-3 fw-bold text-dark">
+                                                    @player.Name
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card bg-light border-0 shadow-sm">
+                                <div class="card-body text-center text-muted">
+                                    Für diese Mannschaft sind aktuell noch keine Spieler verfügbar.
+                                    Die offiziellen Kader werden Anfang Juni ergänzt.
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

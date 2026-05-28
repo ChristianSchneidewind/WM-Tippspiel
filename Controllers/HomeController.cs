@@ -90,11 +90,11 @@ public class HomeController : Controller
                 GroupId = g.Id,
                 GroupName = g.Name,
                 Teams = g.Games
-                    .SelectMany(x => new[] { x.HomeTeamName, x.AwayTeamName })
-                    .Distinct()
-                    .Where(t => !string.IsNullOrEmpty(t))
-                    .OrderBy(t => t)
-                    .Select(t => GameHelper.FixTeamName(t))
+                    .SelectMany(x => new[] { x.HomeTeam, x.AwayTeam })
+                    .Where(t => t != null)
+                    .DistinctBy(t => t!.Id)
+                    .OrderBy(t => t!.Name)
+                    .Select(t => t!)
                     .ToList(),
                 Games = g.Games.OrderBy(x => x.KickOff).ToList()
             })
@@ -194,7 +194,12 @@ public class HomeController : Controller
 
     private static void CalculateTable(GroupOverviewViewModel groupVm)
     {
-        var rows = groupVm.Teams.Select(name => new TableRowViewModel { TeamName = name }).ToList();
+        var rows = groupVm.Teams
+            .Select(team => new TableRowViewModel
+            {
+                TeamName = GameHelper.FixTeamName(team.Name)
+            })
+            .ToList();
 
         foreach (var game in groupVm.Games.Where(g => g.HomeTeamScore.HasValue && g.AwayTeamScore.HasValue))
         {
