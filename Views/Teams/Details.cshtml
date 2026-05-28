@@ -1,8 +1,8 @@
 ﻿@using TippSpiel.Helpers
-@model TippSpiel.Models.Team
+@model TippSpiel.Models.ViewModels.TeamDetailsViewModel
 
 @{
-    ViewData["Title"] = Model.Name;
+    ViewData["Title"] = Model.TeamName;
 }
 
 <style>
@@ -17,8 +17,8 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4 page-title-container">
     <h1 class="display-6 page-title">
-        <span class="fi @FlagHelper.GetFlagClass(Model.Name) me-2 shadow-sm"></span>
-        @GameHelper.FixTeamName(Model.Name)
+        <span class="fi @FlagHelper.GetFlagClass(Model.TeamName) me-2 shadow-sm"></span>
+        @GameHelper.FixTeamName(Model.TeamName)
     </h1>
 
     <a asp-controller="Home" asp-action="Groups" class="btn btn-outline-success btn-sm">
@@ -38,7 +38,7 @@
             Spieler
         </div>
 
-        @if (Model.Players?.Any() == true)
+        @if (Model.Players.Any())
         {
             <div class="table-responsive rounded shadow-sm border border-2 custom-border-green">
                 <table class="table table-success table-striped align-middle mb-0"
@@ -46,15 +46,25 @@
                     <thead style="background-color: var(--bs-success-text-emphasis);">
                         <tr class="small text-white">
                             <th class="ps-3">NAME</th>
+                            <th>POSITION</th>
+                            <th class="text-center">SP</th>
+                            <th class="text-center">TORE</th>
+                            <th class="text-center">VORLAGEN</th>
+                            <th class="text-center">GELB</th>
+                            <th class="text-center">ROT</th>
                         </tr>
                     </thead>
                     <tbody class="small">
-                        @foreach (var player in Model.Players.OrderBy(p => p.Name))
+                        @foreach (var player in Model.Players)
                         {
                             <tr>
-                                <td class="ps-3 fw-bold text-dark">
-                                    @player.Name
-                                </td>
+                                <td class="ps-3 fw-bold text-dark">@player.Name</td>
+                                <td>@(player.Position ?? "-")</td>
+                                <td class="text-center">@player.Appearances</td>
+                                <td class="text-center">@player.Goals</td>
+                                <td class="text-center">@player.Assists</td>
+                                <td class="text-center">@player.YellowCards</td>
+                                <td class="text-center">@player.RedCards</td>
                             </tr>
                         }
                     </tbody>
