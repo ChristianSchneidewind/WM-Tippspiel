@@ -9,7 +9,9 @@ namespace TippSpiel.Models
         
         [Required]
         public string Name { get; set; } = string.Empty;
-        
+        public string? Position { get; set; }
+        public int Appearances{ get; set;  }
+
         public int TeamId { get; set; }
         
         [ForeignKey("TeamId")]
