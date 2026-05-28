@@ -53,6 +53,10 @@ namespace TippSpiel.Data
                 .WithMany()
                 .HasForeignKey(g => g.AwayTeamId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Tipp>()
+                .HasIndex(t => new { t.GameId, t.UserId })
+                .IsUnique();
         }
     }
 }
