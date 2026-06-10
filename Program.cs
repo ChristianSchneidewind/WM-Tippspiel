@@ -6,6 +6,7 @@ using TippSpiel.Data;
 using TippSpiel.Models;
 using TippSpiel.Models.Admin;
 using TippSpiel.Services;
+using TippSpiel.Hubs;
 
 namespace TippSpiel
 {
@@ -30,6 +31,7 @@ namespace TippSpiel
             builder.Services.AddScoped<GroupStandingsService>();
             builder.Services.AddScoped<KnockoutBracketService>();
             builder.Services.AddScoped<KnockoutProgressionService>();
+            builder.Services.AddSignalR();
 
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
@@ -119,7 +121,9 @@ namespace TippSpiel
                 pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
 
-            app.Run();
-        }
+            // SignalR Hub für Echtzeit-Updates
+            app.MapHub<GameResultHub>("/hubs/gameResult");
+
+            app.Run();        }
     }
 }

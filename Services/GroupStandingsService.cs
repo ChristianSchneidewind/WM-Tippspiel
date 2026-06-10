@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using TippSpiel.Data;
 using TippSpiel.Models;
 
@@ -50,9 +52,11 @@ namespace TippSpiel.Services
                     Team = team
                 };
 
-                var gamesWithTeam = (group.Games ?? new List<Game>()).Where(g =>
-                    (g.HomeTeamId == teamId || g.AwayTeamId == teamId) &&
-                    g.HomeTeamScore.HasValue && g.AwayTeamScore.HasValue).ToList();
+                var gamesWithTeam = (group.Games ?? new List<Game>())
+                    .Where(g =>
+                        (g.HomeTeamId == teamId || g.AwayTeamId == teamId) &&
+                        g.HomeTeamScore.HasValue && g.AwayTeamScore.HasValue)
+                    .ToList();
 
                 foreach (var game in gamesWithTeam)
                 {
