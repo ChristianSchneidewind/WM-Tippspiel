@@ -17,6 +17,6 @@ namespace TippSpiel.Models
         [ForeignKey("TeamId")]
         public Team? Team { get; set; }
         
-        public int? ExternalId { get; set; }
+        public string? ExternalId { get; set; }
     }
 }

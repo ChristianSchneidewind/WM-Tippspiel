@@ -29,38 +29,38 @@
                     <ul class="nav nav-pills nav-fill nav-pill-container mx-auto" id="pillNav">
                     
                         <li class="nav-item">
-                            <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")"
+                            <a class="nav-link rounded-5 @((ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index") ? "active" : "")"
                                asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Groups" ? "active" : "")"
+                            <a class="nav-link rounded-5 @((ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Groups") ? "active" : "")"
                                asp-controller="Home" asp-action="Groups">Gruppen</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Teams" ? "active" : "")"
+                            <a class="nav-link rounded-5 @((ViewContext.RouteData.Values["Controller"]?.ToString() == "Teams" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index") ? "active" : "")"
                                asp-controller="Teams" asp-action="Index">Mannschaften</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Finals" ? "active" : "")"
+                            <a class="nav-link rounded-5 @((ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Finals") ? "active" : "")"
                                asp-controller="Home" asp-action="Finals">Finalrunde</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Schedule" ? "active" : "")"
+                            <a class="nav-link rounded-5 @((ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Schedule") ? "active" : "")"
                                asp-controller="Home" asp-action="Schedule">Spielplan</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Statistics" ? "active" : "")"
+                            <a class="nav-link rounded-5 @((ViewContext.RouteData.Values["Controller"]?.ToString() == "Statistics" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index") ? "active" : "")"
                                asp-controller="Statistics"
                                asp-action="Index">
                                 Statistiken
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Rankings" ? "active" : "")"
+                            <a class="nav-link rounded-5 @((ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Rankings") ? "active" : "")"
                                asp-controller="Home" asp-action="Rankings">Rankings</a>
                         </li>                        
                         <li class="nav-item">
-                            <a class="nav-link rounded-5 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Profile" ? "active" : "")"
+                            <a class="nav-link rounded-5 @((ViewContext.RouteData.Values["Controller"]?.ToString() == "Profile" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index") ? "active" : "")"
                                asp-controller="Profile" asp-action="Index">Profil</a>
                         </li>
                     </ul>

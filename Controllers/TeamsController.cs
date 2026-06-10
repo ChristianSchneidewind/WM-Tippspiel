@@ -21,10 +21,44 @@ namespace TippSpiel.Controllers
                 .OrderBy(t => t.Name)
                 .ToListAsync();
 
-            return View(teams);
+            var playerIds = teams
+                .SelectMany(t => t.Players)
+                .Select(p => p.Id)
+                .ToList();
+
+            var events = playerIds.Count == 0
+                ? new List<TippSpiel.Models.MatchEvent>()
+                : await _context.MatchEvents
+                    .Where(e =>
+                        playerIds.Contains(e.PlayerId) ||
+                        (e.AssistPlayerId.HasValue && playerIds.Contains(e.AssistPlayerId.Value)))
+                    .ToListAsync();
+
+            var viewModel = teams.Select(team => new TeamDetailsViewModel
+            {
+                TeamId = team.Id,
+                TeamName = team.Name,
+                Players = team.Players
+                    .OrderBy(p => p.Position)
+                    .ThenBy(p => p.Name)
+                    .Select(p => new PlayerStatsViewModel
+                    {
+                        PlayerId = p.Id,
+                        Name = p.Name,
+                        Position = p.Position,
+                        Appearances = p.Appearances,
+                        Goals = events.Count(e => e.PlayerId == p.Id && e.EventType == "Goal"),
+                        Assists = events.Count(e => e.AssistPlayerId == p.Id),
+                        YellowCards = events.Count(e => e.PlayerId == p.Id && e.EventType == "YellowCard"),
+                        RedCards = events.Count(e => e.PlayerId == p.Id && e.EventType == "RedCard")
+                    })
+                    .ToList()
+            }).ToList();
+
+            return View(viewModel);
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, string? source = null)
         {
             var team = await _context.Teams
                 .Include(t => t.Players)
@@ -47,6 +81,9 @@ namespace TippSpiel.Controllers
             {
                 TeamId = team.Id,
                 TeamName = team.Name,
+                BackUrl = string.Equals(source, "groups", StringComparison.OrdinalIgnoreCase)
+                    ? Url.Action("Groups", "Home")
+                    : Url.Action("Index", "Teams"),
                 Players = team.Players
                     .OrderBy(p => p.Name)
                     .Select(p => new PlayerStatsViewModel

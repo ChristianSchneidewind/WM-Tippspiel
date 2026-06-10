@@ -14,5 +14,6 @@ namespace TippSpiel.Models
         public int? ExternalId { get; set; }
 
         public ICollection<Player> Players { get; set; } = new List<Player>();
+        public string? Slug {get;set;}
     }
 }

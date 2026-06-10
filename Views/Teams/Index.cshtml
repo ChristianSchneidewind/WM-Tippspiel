@@ -1,5 +1,5 @@
 ﻿@using TippSpiel.Helpers
-@model IReadOnlyList<TippSpiel.Models.Team>
+@model IReadOnlyList<TippSpiel.Models.ViewModels.TeamDetailsViewModel>
 
 @{
     ViewData["Title"] = "Mannschaften";
@@ -26,7 +26,43 @@
             color: white;
             filter: brightness(1.08);
         }
+
+    .card-mark {
+        display: inline-block;
+        width: 10px;
+        height: 14px;
+        border-radius: 2px;
+        vertical-align: middle;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    }
 </style>
+
+@functions {
+    private static int GetPositionOrder(string? position)
+    {
+        return position?.Trim().ToLowerInvariant() switch
+        {
+            "torhüter" or "torwart" => 0,
+            "verteidiger" => 1,
+            "mittelfeldspieler" or "mittelfeld" => 2,
+            "stürmer" or "sturm" => 3,
+            _ => 99
+        };
+    }
+
+    private static string GetPositionAbbreviation(string? position)
+    {
+        return position?.Trim().ToLowerInvariant() switch
+        {
+            "torhüter" or "torwart" => "Tw",
+            "verteidiger" => "V",
+            "mittelfeldspieler" or "mittelfeld" => "Mit",
+            "stürmer" or "sturm" => "St",
+            _ => ""
+        };
+    }
+}
 
 <div class="d-flex justify-content-between align-items-center mb-4 page-title-container">
     <h1 class="display-6 page-title">Mannschaften</h1>
@@ -43,7 +79,7 @@ else
     <div class="accordion d-flex flex-column gap-3" id="teamsAccordion">
         @foreach (var team in Model)
         {
-            var collapseId = $"team-{team.Id}";
+            var collapseId = $"team-{team.TeamId}";
 
             <div class="card shadow-sm border-0 overflow-hidden" style="border-radius: 1rem;">
                 <button class="team-toggle-button w-100 text-start py-3 px-4 d-flex justify-content-between align-items-center"
@@ -54,8 +90,8 @@ else
                         aria-controls="@collapseId">
 
                     <span class="fw-bold fs-5">
-                        <span class="fi @FlagHelper.GetFlagClass(team.Name) me-2 shadow-sm"></span>
-                        @GameHelper.FixTeamName(team.Name)
+                        <span class="fi @FlagHelper.GetFlagClass(team.TeamName) me-2 shadow-sm"></span>
+                        @GameHelper.FixTeamName(team.TeamName)
                     </span>
 
                     <i class="bi bi-chevron-down"></i>
@@ -78,15 +114,29 @@ else
                                     <thead style="background-color: var(--bs-success-text-emphasis);">
                                         <tr class="small text-white">
                                             <th class="ps-3">NAME</th>
+                                            <th class="text-center">POSITION</th>
+                                            <th class="text-center">SP</th>
+                                            <th class="text-center">TORE</th>
+                                            <th class="text-center">VORLAGEN</th>
+                                            <th class="text-center" title="Gelbe Karten"><span class="card-mark bg-warning"></span></th>
+                                            <th class="text-center" title="Rote Karten"><span class="card-mark bg-danger"></span></th>
                                         </tr>
                                     </thead>
                                     <tbody class="small">
-                                        @foreach (var player in team.Players.OrderBy(p => p.Name))
+                                        @foreach (var player in team.Players
+                                            .OrderBy(p => GetPositionOrder(p.Position))
+                                            .ThenBy(p => p.Name))
                                         {
                                             <tr>
                                                 <td class="ps-3 fw-bold text-dark">
                                                     @player.Name
                                                 </td>
+                                                <td class="text-center fw-bold text-dark">@GetPositionAbbreviation(player.Position)</td>
+                                                <td class="text-center">@player.Appearances</td>
+                                                <td class="text-center">@player.Goals</td>
+                                                <td class="text-center">@player.Assists</td>
+                                                <td class="text-center">@player.YellowCards</td>
+                                                <td class="text-center">@player.RedCards</td>
                                             </tr>
                                         }
                                     </tbody>

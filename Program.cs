@@ -27,6 +27,9 @@ namespace TippSpiel
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddScoped<IGameRepository, EfGameRepository>();
+            builder.Services.AddScoped<GroupStandingsService>();
+            builder.Services.AddScoped<KnockoutBracketService>();
+            builder.Services.AddScoped<KnockoutProgressionService>();
 
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
@@ -48,9 +51,6 @@ namespace TippSpiel
 
             builder.Services.AddAuthorization();
 
-            // Registriere den Excel Service
-            builder.Services.AddScoped<ExcelImportService>();
-
             var app = builder.Build();
 
             // --- DATEN-SYNCHRONISIERUNG BEIM START ---
@@ -58,25 +58,40 @@ namespace TippSpiel
             {
                 var services = scope.ServiceProvider;
                 var db = services.GetRequiredService<ApplicationDbContext>();
-                var excelService = services.GetRequiredService<ExcelImportService>();
 
                 try
                 {
                     db.Database.Migrate();
 
-                    // 2. Excel-Import (Hauptquelle für Gruppen & Spielplan)
-                    Console.WriteLine("Starte Excel-Import mit neuem Seeder...");
-                    string excelPath = Path.Combine(Directory.GetCurrentDirectory(), "WCup_2026_4.2.5_de.xlsx");
+                    // 2. FIFA Teams importieren
+                    Console.WriteLine("Starte FIFA Team-Import...");
+                    await FifaSeeder.SeedTeamsAsync(db);
+                    Console.WriteLine("FIFA Team-Import abgeschlossen.");
 
-                    // Wir rufen direkt die statische Methode auf, die wir verbessert haben
-                    var venueMap = ExcelSeeder.SeedFromExcel(db, excelPath);
+                    // 3. FIFA Spiele importieren
+                    Console.WriteLine("Starte FIFA Spiel-Import...");
+                    await FifaGameSeeder.SeedGroupGamesAsync(db);
+                    Console.WriteLine("FIFA Spiel-Import abgeschlossen.");
 
-                    Console.WriteLine("Excel-Import abgeschlossen.");
+                    // 4. FIFA Spieler importieren
+                    Console.WriteLine("Starte FIFA Spieler-Import...");
+                    await PlayerSeeder.SeedPlayersAsync(db);
+                    Console.WriteLine("FIFA Spieler-Import abgeschlossen.");
 
-                    // 3. Fehlende K.o.-Spiele ergänzen (bevor User tippen können)
-                    await KnockoutSeeder.SeedAsync(db, venueMap);
+                    Console.WriteLine("===== TEAMS =====");
 
-                    // 4. User anlegen
+                    foreach (var team in db.Teams.Take(10))
+                    {
+                        Console.WriteLine($"{team.Name} | {team.ExternalId} | {team.Slug}");
+                    }
+
+                    // 5. K.o.-Spiele importieren (FIFA + Legacy-Fallback)
+                    await FifaKnockoutSeeder.SeedAsync(db);
+
+                    // 6. K.o.-Fortschritt aktualisieren
+                    await services.GetRequiredService<KnockoutProgressionService>().SyncAsync(db);
+
+                    // 7. User anlegen
                     await UserSeeder.SeedAsync(services);
                 }
                 catch (Exception ex)

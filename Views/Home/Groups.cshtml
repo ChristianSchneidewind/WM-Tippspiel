@@ -79,10 +79,12 @@ else
                                         <a asp-controller="Teams"
                                            asp-action="Details"
                                            asp-route-id="@team.Id"
+                                           asp-route-source="groups"
                                            class="badge rounded-pill px-3 py-2 fw-medium shadow-sm text-decoration-none"
                                            style="background-color: var(--bs-success-text-emphasis); font-size: 0.85rem;">
                                             <span class="fi @FlagHelper.GetFlagClass(team.Name) me-1"></span>
                                             @GameHelper.FixTeamName(team.Name)
+                                            <i class="bi bi-arrow-right-short ms-1"></i>
                                         </a>
                                     }
                                 </div>
