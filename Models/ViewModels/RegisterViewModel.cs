@@ -27,8 +27,9 @@ namespace TippSpiel.Models.ViewModels
         [Display(Name = "Als Admin registrieren")]
         public bool IsAdmin { get; set; }
 
-        [Display(Name = "Admin-Code")]
-        public string? AdminCode { get; set; }
+        [Display(Name = "Admin-Passwort")]
+        [DataType(DataType.Password)]
+        public string? AdminPassword { get; set; }
 
         public string? ReturnUrl { get; set; }
     }
