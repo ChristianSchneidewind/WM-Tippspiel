@@ -88,6 +88,41 @@ public class AdminController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    public IActionResult Result(int id)
+    {
+        var game = _repository.GetGame(id);
+        if (game == null)
+            return NotFound();
+
+        var model = new AdminResultViewModel
+        {
+            Id = game.Id,
+            HomeTeam = game.HomeTeam?.Name ?? game.HomeTeamName ?? "Home",
+            AwayTeam = game.AwayTeam?.Name ?? game.AwayTeamName ?? "Away",
+            HomeTeamScore = game.HomeTeamScore,
+            AwayTeamScore = game.AwayTeamScore
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Result(AdminResultViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var game = _repository.GetGame(model.Id);
+        if (game == null)
+            return NotFound();
+
+        // Aktualisiere das Spiel mit den Ergebnissen und berechne Tipps neu
+        _repository.UpdateResult(model.Id, model.HomeTeamScore, model.AwayTeamScore);
+
+        return RedirectToAction(nameof(Index));
+    }
+
     // ... (Restliche Methoden) ...
 
     private void PopulateGroups(int? selectedGroupId = null)

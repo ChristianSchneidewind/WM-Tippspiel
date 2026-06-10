@@ -6,6 +6,7 @@ using TippSpiel.Data;
 using TippSpiel.Models;
 using TippSpiel.Models.Admin;
 using TippSpiel.Services;
+using TippSpiel.Hubs;
 
 namespace TippSpiel
 {
@@ -27,6 +28,8 @@ namespace TippSpiel
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddScoped<IGameRepository, EfGameRepository>();
+
+            builder.Services.AddScoped<GroupStandingsService>();
 
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
@@ -50,6 +53,9 @@ namespace TippSpiel
 
             // Registriere den Excel Service
             builder.Services.AddScoped<ExcelImportService>();
+
+            // SignalR für Echtzeit-Updates
+            builder.Services.AddSignalR();
 
             var app = builder.Build();
 
@@ -104,7 +110,9 @@ namespace TippSpiel
                 pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
 
-            app.Run();
-        }
+            // SignalR Hub für Echtzeit-Updates
+            app.MapHub<GameResultHub>("/hubs/gameResult");
+
+            app.Run();        }
     }
 }
