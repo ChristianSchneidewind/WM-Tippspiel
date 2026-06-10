@@ -27,4 +27,11 @@
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
+  <ItemGroup>
+    <Compile Remove="TippSpiel/**" />
+    <Content Remove="TippSpiel/**" />
+    <None Remove="TippSpiel/**" />
+    <EmbeddedResource Remove="TippSpiel/**" />
+  </ItemGroup>
+
 </Project>

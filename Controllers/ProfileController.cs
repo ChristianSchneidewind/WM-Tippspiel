@@ -163,6 +163,12 @@ namespace TippSpiel.Controllers
 
             tip.HomeTeamTipp = homeTeamTipp;
             tip.AwayTeamTipp = awayTeamTipp;
+            tip.points = TippPointsHelper.CalculatePoints(
+                tip.HomeTeamTipp,
+                tip.AwayTeamTipp,
+                tip.Game.HomeTeamScore,
+                tip.Game.AwayTeamScore
+            );
 
             await _db.SaveChangesAsync();
 
