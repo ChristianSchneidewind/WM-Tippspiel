@@ -27,6 +27,7 @@ namespace TippSpiel
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddScoped<IGameRepository, EfGameRepository>();
+            builder.Services.AddScoped<GroupStandingsService>();
 
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
@@ -64,19 +65,41 @@ namespace TippSpiel
                 {
                     db.Database.Migrate();
 
-                    // 2. Excel-Import (Hauptquelle für Gruppen & Spielplan)
-                    Console.WriteLine("Starte Excel-Import mit neuem Seeder...");
-                    string excelPath = Path.Combine(Directory.GetCurrentDirectory(), "WCup_2026_4.2.5_de.xlsx");
+                    // 2. FIFA Teams importieren
+                    Console.WriteLine("Starte FIFA Team-Import...");
+                    await FifaSeeder.SeedTeamsAsync(db);
+                    Console.WriteLine("FIFA Team-Import abgeschlossen.");
 
-                    // Wir rufen direkt die statische Methode auf, die wir verbessert haben
+                    // 3. FIFA Spieler importieren
+                    Console.WriteLine("Starte FIFA Spieler-Import...");
+                    await PlayerSeeder.SeedPlayersAsync(db);
+                    Console.WriteLine("FIFA Spieler-Import abgeschlossen.");
+
+                    // 4. Excel-Import (nur Gruppen, Spiele und Stadien)
+                    Console.WriteLine("Starte Excel-Import...");
+                    string excelPath = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "WCup_2026_4.2.5_de.xlsx"
+                        );
+
                     var venueMap = ExcelSeeder.SeedFromExcel(db, excelPath);
 
                     Console.WriteLine("Excel-Import abgeschlossen.");
 
-                    // 3. Fehlende K.o.-Spiele ergänzen (bevor User tippen können)
+                    Console.WriteLine("===== TEAMS =====");
+
+                    foreach (var team in db.Teams.Take(10))
+                    {
+                        Console.WriteLine
+                        (
+                            $"{team.Name} | {team.ExternalId} | {team.Slug}"
+                        );
+}
+
+                    // 4. Fehlende K.o.-Spiele ergänzen
                     await KnockoutSeeder.SeedAsync(db, venueMap);
 
-                    // 4. User anlegen
+                    // 5. User anlegen
                     await UserSeeder.SeedAsync(services);
                 }
                 catch (Exception ex)

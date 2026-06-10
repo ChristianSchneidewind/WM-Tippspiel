@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using TippSpiel.Helpers;
 using TippSpiel.Models;
 
 namespace TippSpiel.Data
@@ -83,7 +82,6 @@ namespace TippSpiel.Data
             existing.AwayTeamScore = game.AwayTeamScore;
             existing.Venue = game.Venue;
 
-            RecalculateTipPoints(existing.Id, existing.HomeTeamScore, existing.AwayTeamScore);
             _db.SaveChanges();
         }
 
@@ -97,23 +95,7 @@ namespace TippSpiel.Data
 
             existing.HomeTeamScore = homeScore;
             existing.AwayTeamScore = awayScore;
-            RecalculateTipPoints(existing.Id, existing.HomeTeamScore, existing.AwayTeamScore);
             _db.SaveChanges();
-        }
-
-        private void RecalculateTipPoints(int gameId, int? homeScore, int? awayScore)
-        {
-            var tips = _db.Tipps.Where(t => t.GameId == gameId).ToList();
-
-            foreach (var tip in tips)
-            {
-                tip.points = TippPointsHelper.CalculatePoints(
-                    tip.HomeTeamTipp,
-                    tip.AwayTeamTipp,
-                    homeScore,
-                    awayScore
-                );
-            }
         }
     }
 }

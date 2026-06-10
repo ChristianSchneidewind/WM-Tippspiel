@@ -13,7 +13,43 @@
     .tracking-wider {
         letter-spacing: 0.05em;
     }
+
+    .card-mark {
+        display: inline-block;
+        width: 10px;
+        height: 14px;
+        border-radius: 2px;
+        vertical-align: middle;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    }
 </style>
+
+@functions {
+    private static int GetPositionOrder(string? position)
+    {
+        return position?.Trim().ToLowerInvariant() switch
+        {
+            "torhüter" or "torwart" => 0,
+            "verteidiger" => 1,
+            "mittelfeldspieler" or "mittelfeld" => 2,
+            "stürmer" or "sturm" => 3,
+            _ => 99
+        };
+    }
+
+    private static string GetPositionAbbreviation(string? position)
+    {
+        return position?.Trim().ToLowerInvariant() switch
+        {
+            "torhüter" or "torwart" => "Tw",
+            "verteidiger" => "V",
+            "mittelfeldspieler" or "mittelfeld" => "Mit",
+            "stürmer" or "sturm" => "St",
+            _ => ""
+        };
+    }
+}
 
 <div class="d-flex justify-content-between align-items-center mb-4 page-title-container">
     <h1 class="display-6 page-title">
@@ -21,7 +57,7 @@
         @GameHelper.FixTeamName(Model.TeamName)
     </h1>
 
-    <a asp-controller="Home" asp-action="Groups" class="btn btn-outline-success btn-sm">
+    <a href="@(Model.BackUrl ?? Url.Action("Index", "Teams"))" class="btn btn-success btn-sm shadow-sm">
         <i class="bi bi-arrow-left me-1"></i> Zurück
     </a>
 </div>
@@ -46,20 +82,24 @@
                     <thead style="background-color: var(--bs-success-text-emphasis);">
                         <tr class="small text-white">
                             <th class="ps-3">NAME</th>
-                            <th>POSITION</th>
+                            <th class="text-center">POSITION</th>
                             <th class="text-center">SP</th>
                             <th class="text-center">TORE</th>
                             <th class="text-center">VORLAGEN</th>
-                            <th class="text-center">GELB</th>
-                            <th class="text-center">ROT</th>
+                            <th class="text-center" title="Gelbe Karten"><span class="card-mark bg-warning"></span></th>
+                            <th class="text-center" title="Rote Karten"><span class="card-mark bg-danger"></span></th>
                         </tr>
                     </thead>
                     <tbody class="small">
-                        @foreach (var player in Model.Players)
+                        @foreach (var player in Model.Players
+                            .OrderBy(p => GetPositionOrder(p.Position))
+                            .ThenBy(p => p.Name))
                         {
                             <tr>
-                                <td class="ps-3 fw-bold text-dark">@player.Name</td>
-                                <td>@(player.Position ?? "-")</td>
+                                <td class="ps-3 fw-bold text-dark">
+                                    @player.Name
+                                </td>
+                                <td class="text-center fw-bold text-dark">@GetPositionAbbreviation(player.Position)</td>
                                 <td class="text-center">@player.Appearances</td>
                                 <td class="text-center">@player.Goals</td>
                                 <td class="text-center">@player.Assists</td>

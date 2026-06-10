@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using ExcelDataReader;
+using Microsoft.EntityFrameworkCore;
 using TippSpiel.Models;
 
 namespace TippSpiel.Data
@@ -215,8 +216,14 @@ namespace TippSpiel.Data
                 // Nutze die neue dynamische Gruppen-Logik
                 var group = GetOrCreateGroup(db, groupName, groupLookup);
 
-                var homeTeam = GetOrCreateTeam(db, team1);
-                var awayTeam = GetOrCreateTeam(db, team2);
+                var homeTeam = FindTeam(db, team1);
+                var awayTeam = FindTeam(db, team2);
+
+                if (homeTeam == null || awayTeam == null)
+                {
+                    Console.WriteLine($"[EXCEL SEEDER] Team nicht gefunden: {team1} vs {team2}");
+                    continue;
+                }
 
                 var venue = string.Empty;
                 if (matchNumber.HasValue && matchIdToVenue.TryGetValue(matchNumber.Value, out var v))
@@ -253,16 +260,51 @@ namespace TippSpiel.Data
             return dbGroup;
         }
 
-        private static Team GetOrCreateTeam(ApplicationDbContext db, string name)
+        private static Team? FindTeam(ApplicationDbContext db, string name)
         {
-            var team = db.Teams.FirstOrDefault(t => t.Name == name);
-            if (team == null)
+            var normalizedName = NormalizeTeamName(name);
+            var teams = db.Teams.AsNoTracking().ToList();
+
+            var team = teams.FirstOrDefault(t => NormalizeTeamName(t.Name) == normalizedName);
+            if (team != null)
             {
-                team = new Team { Name = name };
-                db.Teams.Add(team);
-                db.SaveChanges();
+                return team;
             }
+
+            var fifaName = MapExcelNameToFifaName(name);
+            var normalizedFifaName = NormalizeTeamName(fifaName);
+            if (normalizedFifaName != normalizedName)
+            {
+                team = teams.FirstOrDefault(t => NormalizeTeamName(t.Name) == normalizedFifaName);
+            }
+
             return team;
+        }
+
+        private static string NormalizeTeamName(string name)
+        {
+            return new string(name
+                .Trim()
+                .Replace("\u00A0", " ")
+                .Where(c => !char.IsWhiteSpace(c) && c != '-' && c != '.' && c != '/')
+                .ToArray())
+                .ToLowerInvariant();
+        }
+
+        private static string MapExcelNameToFifaName(string name)
+        {
+            return name switch
+            {
+                "Südkorea" => "Republik Korea",
+                "Bosnien/Herzeg." => "Bosnien und Herzegowina",
+                "Iran" => "IR Iran",
+                "DR Kongo" => "DR Kongo",
+                "Saudi Arabien" => "Saudi-Arabien",
+                "Curacao" => "Curaçao",
+                "Kap Verde" => "Kap Verde",
+                "Elfenbeinküste" => "Elfenbeinküste",
+                _ => name
+            };
         }
 
         private static string ResolveGroupName(Dictionary<string, string> teamToGroup, string team1, string team2, string teamsCode)

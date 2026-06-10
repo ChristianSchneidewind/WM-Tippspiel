@@ -6,6 +6,7 @@ using TippSpiel.Models;
 using TippSpiel.Data;
 using TippSpiel.Models.ViewModels;
 using TippSpiel.Helpers;
+using TippSpiel.Services;
 
 namespace TippSpiel.Controllers;
 
@@ -13,11 +14,13 @@ public class HomeController : Controller
 {
     private readonly ApplicationDbContext _db;
     private readonly UserManager<User> _userManager;
+    private readonly GroupStandingsService _groupStandingsService;
 
-    public HomeController(ApplicationDbContext db, UserManager<User> userManager)
+    public HomeController(ApplicationDbContext db, UserManager<User> userManager, GroupStandingsService groupStandingsService)
     {
         _db = db;
         _userManager = userManager;
+        _groupStandingsService = groupStandingsService;
     }
 
     // --- STARTSEITE ---
@@ -103,7 +106,22 @@ public class HomeController : Controller
         // 3. Tabellen berechnen (nur für die gefilterten Gruppen)
         foreach (var groupVm in groupsVm)
         {
-            CalculateTable(groupVm);
+            var standings = _groupStandingsService.CalculateGroupStandings(groupVm.GroupId);
+
+            groupVm.TableRows = standings
+                .Select((standing, index) => new TableRowViewModel
+                {
+                    Position = index + 1,
+                    TeamName = GameHelper.FixTeamName(standing.Team?.Name ?? string.Empty),
+                    GamesPlayed = standing.Played,
+                    Wins = standing.Won,
+                    Draws = standing.Drawn,
+                    Losses = standing.Lost,
+                    GoalsFor = standing.GoalsFor,
+                    GoalsAgainst = standing.GoalsAgainst,
+                    Points = standing.Points
+                })
+                .ToList();
         }
 
         return View(groupsVm);
@@ -189,48 +207,6 @@ public class HomeController : Controller
 
         return View(new RankingsViewModel { Entries = entries });
     }
-
-    // --- HILFSMETHODEN ---
-
-    private static void CalculateTable(GroupOverviewViewModel groupVm)
-    {
-        var rows = groupVm.Teams
-            .Select(team => new TableRowViewModel
-            {
-                TeamName = GameHelper.FixTeamName(team.Name)
-            })
-            .ToList();
-
-        foreach (var game in groupVm.Games.Where(g => g.HomeTeamScore.HasValue && g.AwayTeamScore.HasValue))
-        {
-            // Normalize game team names to the same normalized form as groupVm.Teams
-            var homeName = GameHelper.FixTeamName(game.HomeTeamName);
-            var awayName = GameHelper.FixTeamName(game.AwayTeamName);
-
-            var home = rows.FirstOrDefault(r => r.TeamName == homeName);
-            var away = rows.FirstOrDefault(r => r.TeamName == awayName);
-
-            if (home != null && away != null)
-            {
-                home.GamesPlayed++; away.GamesPlayed++;
-                home.GoalsFor += game.HomeTeamScore!.Value; home.GoalsAgainst += game.AwayTeamScore!.Value;
-                away.GoalsFor += game.AwayTeamScore!.Value; away.GoalsAgainst += game.HomeTeamScore!.Value;
-
-                if (game.HomeTeamScore > game.AwayTeamScore) { home.Wins++; home.Points += 3; away.Losses++; }
-                else if (game.HomeTeamScore < game.AwayTeamScore) { away.Wins++; away.Points += 3; home.Losses++; }
-                else { home.Draws++; away.Draws++; home.Points += 1; away.Points += 1; }
-            }
-        }
-
-        groupVm.TableRows = rows
-            .OrderByDescending(r => r.Points)
-            .ThenByDescending(r => r.GoalDifference)
-            .ThenByDescending(r => r.GoalsFor)
-            .ToList();
-
-        for (int i = 0; i < groupVm.TableRows.Count; i++) groupVm.TableRows[i].Position = i + 1;
-    }
-
     public IActionResult Privacy() => View();
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TippSpiel.Data;
-using TippSpiel.Helpers;
 using TippSpiel.Models;
 
 namespace TippSpiel.Controllers
@@ -56,13 +55,6 @@ namespace TippSpiel.Controllers
                 tip.HomeTeamTipp = request.HomeScore;
                 tip.AwayTeamTipp = request.AwayScore;
             }
-
-            tip.points = TippPointsHelper.CalculatePoints(
-                tip.HomeTeamTipp,
-                tip.AwayTeamTipp,
-                game.HomeTeamScore,
-                game.AwayTeamScore
-            );
 
             await _context.SaveChangesAsync();
             return Ok();
