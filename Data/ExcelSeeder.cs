@@ -215,8 +215,20 @@ namespace TippSpiel.Data
                 // Nutze die neue dynamische Gruppen-Logik
                 var group = GetOrCreateGroup(db, groupName, groupLookup);
 
-                var homeTeam = GetOrCreateTeam(db, team1);
-                var awayTeam = GetOrCreateTeam(db, team2);
+                var homeTeam = db.Teams
+                    .FirstOrDefault(t => t.Name == team1);
+
+                var awayTeam = db.Teams
+                    .FirstOrDefault(t => t.Name == team2);
+
+                if (homeTeam == null || awayTeam == null)
+                {
+                    Console.WriteLine(
+                        $"TEAM NICHT GEFUNDEN: {team1} vs {team2}"
+                    );
+
+                continue;
+                }
 
                 var venue = string.Empty;
                 if (matchNumber.HasValue && matchIdToVenue.TryGetValue(matchNumber.Value, out var v))
@@ -253,17 +265,7 @@ namespace TippSpiel.Data
             return dbGroup;
         }
 
-        private static Team GetOrCreateTeam(ApplicationDbContext db, string name)
-        {
-            var team = db.Teams.FirstOrDefault(t => t.Name == name);
-            if (team == null)
-            {
-                team = new Team { Name = name };
-                db.Teams.Add(team);
-                db.SaveChanges();
-            }
-            return team;
-        }
+        
 
         private static string ResolveGroupName(Dictionary<string, string> teamToGroup, string team1, string team2, string teamsCode)
         {
