@@ -15,10 +15,14 @@ namespace TippSpiel.Controllers;
 public class AdminController : Controller
 {
     private readonly IGameRepository _repository;
+    private readonly ApplicationDbContext _db;
+    private readonly KnockoutProgressionService _knockoutProgressionService;
 
-    public AdminController(IGameRepository repository)
+    public AdminController(IGameRepository repository, ApplicationDbContext db, KnockoutProgressionService knockoutProgressionService)
     {
         _repository = repository;
+        _db = db;
+        _knockoutProgressionService = knockoutProgressionService;
     }
 
     // --- Der Rest bleibt weitgehend gleich, aber achte auf die Repository-Aufrufe ---
@@ -59,7 +63,7 @@ public class AdminController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult EditGame(AdminGameEditViewModel model)
+    public async Task<IActionResult> EditGame(AdminGameEditViewModel model)
     {
         if (!ModelState.IsValid)
         {
@@ -83,6 +87,7 @@ public class AdminController : Controller
             game.Venue = model.Venue;
 
             _repository.UpdateGame(game);
+            await _knockoutProgressionService.SyncAsync(_db);
         }
 
         return RedirectToAction(nameof(Index));

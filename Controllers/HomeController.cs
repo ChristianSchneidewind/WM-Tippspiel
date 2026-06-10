@@ -15,12 +15,14 @@ public class HomeController : Controller
     private readonly ApplicationDbContext _db;
     private readonly UserManager<User> _userManager;
     private readonly GroupStandingsService _groupStandingsService;
+    private readonly KnockoutBracketService _knockoutBracketService;
 
-    public HomeController(ApplicationDbContext db, UserManager<User> userManager, GroupStandingsService groupStandingsService)
+    public HomeController(ApplicationDbContext db, UserManager<User> userManager, GroupStandingsService groupStandingsService, KnockoutBracketService knockoutBracketService)
     {
         _db = db;
         _userManager = userManager;
         _groupStandingsService = groupStandingsService;
+        _knockoutBracketService = knockoutBracketService;
     }
 
     // --- STARTSEITE ---
@@ -130,33 +132,8 @@ public class HomeController : Controller
     // --- FINALRUNDE ---
     public async Task<IActionResult> Finals()
     {
-        // Diese Liste MUSS exakt mit den Rückgabewerten deines FootballApiServices übereinstimmen
-        var knockoutOrder = new List<string>
-    {
-        "Sechzehntelfinale",
-        "Achtelfinale",
-        "Viertelfinale",
-        "Halbfinale",
-        "Spiel um Platz 3",
-        "Finale"
-    };
-
-        var roundsData = await _db.Groups
-            .Include(g => g.Games).ThenInclude(game => game.HomeTeam)
-            .Include(g => g.Games).ThenInclude(game => game.AwayTeam)
-            .ToListAsync(); // Wir laden erst alles, um C#-Vergleiche (Trim/Ignore Case) zu nutzen
-
-        var sortedRounds = roundsData
-            .Where(g => knockoutOrder.Any(k => k.Equals(g.Name?.Trim(), StringComparison.OrdinalIgnoreCase)))
-            .OrderBy(g => knockoutOrder.IndexOf(knockoutOrder.First(k => k.Equals(g.Name?.Trim(), StringComparison.OrdinalIgnoreCase))))
-            .Select(g => new KnockoutRoundViewModel
-            {
-                Name = g.Name.Trim(),
-                Games = g.Games.OrderBy(x => x.KickOff).ToList()
-            })
-            .ToList();
-
-        return View(new FinalsViewModel { Rounds = sortedRounds });
+        var rounds = await _knockoutBracketService.BuildAsync(_db);
+        return View(new FinalsViewModel { Rounds = rounds });
     }
 
     // --- SPIELPLAN ---
