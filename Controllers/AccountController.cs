@@ -87,9 +87,9 @@ namespace TippSpiel.Controllers
 
             if (model.IsAdmin)
             {
-                if (string.IsNullOrWhiteSpace(model.AdminCode) || !string.Equals(model.AdminCode, _adminOptions.RegistrationCode, StringComparison.Ordinal))
+                if (string.IsNullOrWhiteSpace(model.AdminPassword) || !string.Equals(model.AdminPassword, _adminOptions.AdminRegistrationPassword, StringComparison.Ordinal))
                 {
-                    ModelState.AddModelError(nameof(RegisterViewModel.AdminCode), "Admin-Code ist ungültig.");
+                    ModelState.AddModelError(nameof(RegisterViewModel.AdminPassword), "Admin-Passwort ist ungültig.");
                     return View(model);
                 }
             }
