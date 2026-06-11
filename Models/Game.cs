@@ -21,6 +21,8 @@ namespace TippSpiel.Models
         public DateTimeOffset KickOff { get; set; }
         public int? HomeTeamScore { get; set; }
         public int? AwayTeamScore { get; set; }
+        public int? HomeTeamPenaltyScore { get; set; }
+        public int? AwayTeamPenaltyScore { get; set; }
         public int? MatchNumber { get; set; }
         public string? Venue { get; set; }
 
