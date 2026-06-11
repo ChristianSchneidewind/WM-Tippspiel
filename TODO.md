@@ -1,10 +1,11 @@
 # TODO
 
 ## Nächste Schritte
-- [ ] Daily-Update der FIFA-/DB-Daten automatisieren
+- [ ] Daily-Update der FIFA-/DB-Daten automatisieren (Mr. Christian)
 - [ ] KO-Fortschritt nach echten FIFA-Ergebnissen weiter verifizieren
 - [ ] Restliche Altlasten/Excel-Reste final entfernen, falls nicht mehr benötigt
 - [ ] Fehlerfälle und Fallbacks aufräumen
+- [ ] Cosmetic-Feinschliff (z.B. UI-Verbesserungen, Fehlermeldungen, etc.) > siehe screenshots
 
 ## Bereits erledigt
 - [x] Excel aus dem Spiel-Import entfernt

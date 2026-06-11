@@ -247,13 +247,28 @@ public class KnockoutBracketService
         if (string.IsNullOrWhiteSpace(homeName) || string.IsNullOrWhiteSpace(awayName))
             return null;
 
-        if (sourceGame.HomeTeamScore == sourceGame.AwayTeamScore)
-            return null;
+        // 1. Entscheidung nach regulärer Spielzeit / Verlängerung
+        if (sourceGame.HomeTeamScore != sourceGame.AwayTeamScore)
+        {
+            var homeWon = sourceGame.HomeTeamScore > sourceGame.AwayTeamScore;
+            return winner
+                ? (homeWon ? homeName : awayName)
+                : (homeWon ? awayName : homeName);
+        }
 
-        var homeWon = sourceGame.HomeTeamScore > sourceGame.AwayTeamScore;
-        return winner
-            ? (homeWon ? homeName : awayName)
-            : (homeWon ? awayName : homeName);
+        // 2. Entscheidung im Elfmeterschießen
+        if (sourceGame.HomeTeamPenaltyScore.HasValue && sourceGame.AwayTeamPenaltyScore.HasValue)
+        {
+            if (sourceGame.HomeTeamPenaltyScore.Value == sourceGame.AwayTeamPenaltyScore.Value)
+                return null;
+
+            var homeWonPenalties = sourceGame.HomeTeamPenaltyScore.Value > sourceGame.AwayTeamPenaltyScore.Value;
+            return winner
+                ? (homeWonPenalties ? homeName : awayName)
+                : (homeWonPenalties ? awayName : homeName);
+        }
+
+        return null;
     }
 
     private (int SourceMatch, bool Winner)? ResolveSource(int matchNumber, bool isHome)

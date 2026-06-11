@@ -19,8 +19,14 @@ namespace TippSpiel.Models
         public Team? AwayTeam { get; set; }
 
         public DateTimeOffset KickOff { get; set; }
+
         public int? HomeTeamScore { get; set; }
         public int? AwayTeamScore { get; set; }
+
+        // NEU: Für die Entscheidung im Elfmeterschießen in der K.o.-Runde
+        public int? HomeTeamPenaltyScore { get; set; }
+        public int? AwayTeamPenaltyScore { get; set; }
+
         public int? MatchNumber { get; set; }
         public string? Venue { get; set; }
 

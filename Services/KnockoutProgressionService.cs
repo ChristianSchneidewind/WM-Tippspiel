@@ -259,13 +259,30 @@ public class KnockoutProgressionService
         if (!homeTeamId.HasValue || !awayTeamId.HasValue)
             return null;
 
-        if (sourceGame.HomeTeamScore == sourceGame.AwayTeamScore)
-            return null;
+        // 1. Logik für ein normales Spielergebnis (Entscheidung nach 90 oder 120 Minuten)
+        if (sourceGame.HomeTeamScore != sourceGame.AwayTeamScore)
+        {
+            var homeWonNormal = sourceGame.HomeTeamScore > sourceGame.AwayTeamScore;
+            return winner
+                ? (homeWonNormal ? homeTeamId : awayTeamId)
+                : (homeWonNormal ? awayTeamId : homeTeamId);
+        }
 
-        var homeWon = sourceGame.HomeTeamScore > sourceGame.AwayTeamScore;
-        return winner
-            ? (homeWon ? homeTeamId : awayTeamId)
-            : (homeWon ? awayTeamId : homeTeamId);
+        // 2. Fallback-Logik für Gleichstand -> Entscheidung im Elfmeterschießen
+        if (sourceGame.HomeTeamPenaltyScore.HasValue && sourceGame.AwayTeamPenaltyScore.HasValue)
+        {
+            // Falls das Elfmeterschießen unentschieden eingetragen wurde (Fehlerfallabsicherung)
+            if (sourceGame.HomeTeamPenaltyScore.Value == sourceGame.AwayTeamPenaltyScore.Value)
+                return null;
+
+            var homeWonPenalties = sourceGame.HomeTeamPenaltyScore.Value > sourceGame.AwayTeamPenaltyScore.Value;
+            return winner
+                ? (homeWonPenalties ? homeTeamId : awayTeamId)
+                : (homeWonPenalties ? awayTeamId : homeTeamId);
+        }
+
+        // Das Spiel steht Unentschieden, aber es wurde noch kein Elfmeterschießen eingetragen (z.B. während das Spiel läuft)
+        return null;
     }
 
     private static string? ExtractGroupLetter(string? groupName)
