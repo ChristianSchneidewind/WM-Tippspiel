@@ -25,40 +25,19 @@
     <div class="d-flex justify-content-between align-items-center mb-5 p-3 rounded-3 shadow" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border-left: 5px solid #ffc107;">
         <div>
             <h1 class="text-white mb-0 fw-bold">Admin Control Center</h1>
-            <small class="text-white-50">Verwalte den Spielplan und die API-Daten</small>
+            <small class="text-white-50">Verwaltung</small>
         </div>
         <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
             <button type="submit" class="btn btn-outline-danger btn-sm">Abmelden</button>
         </form>
     </div>
 
-    @* Quick Actions / API Bereich *@
-    <div class="row mb-5">
-        <div class="col-md-12">
-            <div class="card bg-dark text-white shadow-lg border-0">
-                <div class="card-body d-flex gap-3 align-items-center">
-                    <div class="flex-grow-1">
-                        <h5 class="mb-1 text-warning">API Schnittstelle (Football-Data)</h5>
-                        <p class="mb-0 small text-muted">Aktualisiert Paarungen, Ergebnisse und löst Playoff-Platzhalter auf.</p>
-                    </div>
-                    @* Nur noch ein Formular für den intelligenten Sync *@
-                    <form asp-action="SyncWithApi" method="post">
-                        <button type="submit" class="btn btn-warning px-4 shadow fw-bold">
-                            <i class="bi bi-arrow-repeat"></i> Komplett-Sync ausführen
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="row">
         @* Linke Spalte: Gruppen *@
         <div class="col-md-4 mb-4">
             <div class="card h-100 bg-dark text-white border-0 shadow">
-                <div class="card-header border-bottom border-secondary d-flex justify-content-between align-items-center">
+                <div class="card-header border-bottom border-secondary">
                     <h5 class="mb-0">Gruppen</h5>
-                    <a asp-action="CreateGroup" class="btn btn-primary btn-sm rounded-circle shadow-sm"><i class="bi bi-plus"></i></a>
                 </div>
                 <div class="card-body">
                     @if (!Model.Groups.Any())
@@ -86,14 +65,10 @@
         @* Rechte Spalte: Spiele *@
         <div class="col-md-8 mb-4">
             <div class="card h-100 bg-dark text-white border-0 shadow">
-                <div class="card-header border-bottom border-secondary d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Spiele</h5>
-                    <a asp-action="CreateGame" class="btn btn-primary btn-sm shadow-sm">Neues Spiel</a>
-                </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-dark table-hover mb-0 align-middle">
-                            <thead class="table-light text-dark">
+                            <thead class="table-dark border-bottom border-secondary text-white-50 small text-uppercase">
                                 <tr>
                                     <th>Partie</th>
                                     <th>Gruppe</th>
@@ -108,12 +83,12 @@
                                 {
                                     <tr>
                                         <td>
-                                            <div class="fw-bold">@(game.HomeTeam?.Name ?? game.HomeTeamName ?? "TBD")</div>
-                                            <div class="fw-bold text-muted small">@(game.AwayTeam?.Name ?? game.AwayTeamName ?? "TBD")</div>
+                                            <div class="small">@(game.HomeTeam?.Name ?? game.HomeTeamName ?? "TBD")</div>
+                                            <div class="small">@(game.AwayTeam?.Name ?? game.AwayTeamName ?? "TBD")</div>
                                         </td>
                                         <td><span class="badge bg-outline-info border border-info text-info">@game.Group?.Name</span></td>
                                         <td class="small">@game.KickOff.LocalDateTime.ToString("g")</td>
-                                        <td class="small text-muted">
+                                        <td class="small">
                                             @if (!string.IsNullOrEmpty(game.Venue))
                                             {
                                                 <i class="bi bi-geo-alt me-1"></i> @game.Venue
@@ -130,7 +105,7 @@
                                             }
                                             else
                                             {
-                                                <span class="text-muted fst-italic small">ausstehend</span>
+                                                <span class="fst-italic small">ausstehend</span>
                                             }
                                         </td>
                                         <td class="text-end">

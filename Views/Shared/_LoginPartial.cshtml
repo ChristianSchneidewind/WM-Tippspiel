@@ -8,12 +8,12 @@
 
     @if (SignInManager.IsSignedIn(User))
     {
-        <li class="nav-item">
-            <span class="nav-link disabled text-muted px-3">
-                <i class="bi bi-person-fill"></i> @User.Identity?.Name
+        <li class="nav-item d-flex align-items-center">
+            <span class="nav-link text-white-50 px-3">
+                <i class="bi bi-person-fill me-1 text-warning"></i> @User.Identity?.Name
             </span>
         </li>
-        
+
         @if (User.IsInRole("Admin"))
         {
             <li class="nav-item">
