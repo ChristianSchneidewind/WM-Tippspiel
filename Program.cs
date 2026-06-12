@@ -123,7 +123,22 @@ namespace TippSpiel
 
             // SignalR Hub für Echtzeit-Updates
             app.MapHub<GameResultHub>("/hubs/gameResult");
+           
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var context = services.GetRequiredService<TippSpiel.Data.ApplicationDbContext>();
 
+                // 1. Sicherstellen, dass die DB-Struktur existiert
+                await context.Database.MigrateAsync();
+
+                // 2. FIFA Teams & Spiele neu laden (Das befüllt den Spielplan und die Gruppen!)
+                Console.WriteLine("Starte FIFA-Daten-Seeding...");
+                await TippSpiel.Data.FifaSeeder.SeedTeamsAsync(context);
+                await TippSpiel.Data.FifaGameSeeder.SeedGroupGamesAsync(context);
+                await TippSpiel.Data.FifaKnockoutSeeder.SeedAsync(context);
+                Console.WriteLine("FIFA-Daten erfolgreich geladen!");
+            }
             app.Run();        }
     }
 }

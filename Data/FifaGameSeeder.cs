@@ -200,7 +200,8 @@ public static class FifaGameSeeder
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        NumberHandling = JsonNumberHandling.AllowReadingFromString
     };
 
     private sealed class CompetitionResponse
