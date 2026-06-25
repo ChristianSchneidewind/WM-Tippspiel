@@ -48,7 +48,7 @@ namespace TippSpiel.Controllers
                         Position = p.Position,
                         Appearances = p.Appearances,
                         Goals = events.Count(e => e.PlayerId == p.Id && e.EventType == "Goal"),
-                        Assists = events.Count(e => e.AssistPlayerId == p.Id),
+                        Assists = events.Count(e => e.PlayerId == p.Id && e.EventType == "Assist"),
                         YellowCards = events.Count(e => e.PlayerId == p.Id && e.EventType == "YellowCard"),
                         RedCards = events.Count(e => e.PlayerId == p.Id && e.EventType == "RedCard")
                     })
@@ -93,7 +93,7 @@ namespace TippSpiel.Controllers
                         Position = p.Position,
                         Appearances = p.Appearances,
                         Goals = events.Count(e => e.PlayerId == p.Id && e.EventType == "Goal"),
-                        Assists = events.Count(e => e.AssistPlayerId == p.Id),
+                        Assists = events.Count(e => e.PlayerId == p.Id && e.EventType == "Assist"),
                         YellowCards = events.Count(e => e.PlayerId == p.Id && e.EventType == "YellowCard"),
                         RedCards = events.Count(e => e.PlayerId == p.Id && e.EventType == "RedCard")
                     })

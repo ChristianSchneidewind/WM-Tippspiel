@@ -40,30 +40,30 @@ namespace TippSpiel.Controllers
                 .Take(10)
                 .ToListAsync();
 
-            
-            
+
+
 
             // Top-Assists
             vm.TopAssists = await _db.MatchEvents
-                .Where(e => e.AssistPlayerId != null)
-                .Include(e => e.AssistPlayer)
-                    .ThenInclude(p => p!.Team)
+                .Where(e => e.EventType == "Assist")
+                .Include(e => e.Player)
+                .ThenInclude(p => p!.Team)
                 .GroupBy(e => new
-                {
-                    PlayerId = e.AssistPlayerId!.Value,
-                    PlayerName = e.AssistPlayer!.Name,
-                    TeamName = e.AssistPlayer.Team!.Name
-                })
-                .Select(g => new PlayerStatisticViewModel
-                {
-                    PlayerId = g.Key.PlayerId,
-                    PlayerName = g.Key.PlayerName,
-                    TeamName = g.Key.TeamName,
-                    Count = g.Count()
-                })
-                .OrderByDescending(x => x.Count)
-                .Take(10)
-                .ToListAsync();
+            {
+                e.PlayerId,
+                PlayerName = e.Player!.Name,
+                TeamName = e.Player.Team!.Name
+            })
+            .Select(g => new PlayerStatisticViewModel
+            {
+                PlayerId = g.Key.PlayerId,
+                PlayerName = g.Key.PlayerName,
+                TeamName = g.Key.TeamName,
+                Count = g.Count()
+            })
+            .OrderByDescending(x => x.Count)
+            .Take(10)
+            .ToListAsync();
 
             // Gelbe Karten
             vm.YellowCards = await _db.MatchEvents
@@ -132,8 +132,18 @@ namespace TippSpiel.Controllers
                 team.FairplayPoints = team.YellowCards + team.RedCards * 3;
             }
 
+            Console.WriteLine(
+                 $"Min FairplayPoints: {teamFairplayStats.Min(t => t.FairplayPoints)}");
+
+                foreach (var team in teamFairplayStats
+                    .OrderBy(t => t.FairplayPoints)
+                    .Take(10))
+            {
+                Console.WriteLine(
+                    $"{team.TeamName} | Gelb={team.YellowCards} | Rot={team.RedCards} | FP={team.FairplayPoints}");
+            }
+
             vm.FairestTeams = teamFairplayStats
-                .Where(t => t.YellowCards > 0 || t.RedCards > 0)
                 .OrderBy(t => t.FairplayPoints)
                 .ThenBy(t => t.YellowCards)
                 .Take(5)

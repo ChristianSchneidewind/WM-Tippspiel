@@ -42,10 +42,6 @@ public static class PlayerSeeder
 
                 foreach (var fifaPlayer in response.Players)
                 {
-                    if (await context.Players.AnyAsync(
-                            p => p.ExternalId == fifaPlayer.IdPlayer))
-                        continue;
-
                     var playerName =
                         fifaPlayer.PlayerName?
                             .FirstOrDefault()?
@@ -56,6 +52,20 @@ public static class PlayerSeeder
                         fifaPlayer.PositionLocalized?
                             .FirstOrDefault()?
                             .Description;
+
+                    Console.WriteLine(
+                        $"{playerName} | MatchesPlayed = {fifaPlayer.MatchesPlayed}");
+                    var existingPlayer = await context.Players
+                        .FirstOrDefaultAsync(p => p.ExternalId == fifaPlayer.IdPlayer);
+
+                    if (existingPlayer != null)
+                    {
+                        existingPlayer.Name = playerName;
+                        existingPlayer.TeamId = team.Id;
+                        existingPlayer.Position = position;
+                        existingPlayer.Appearances = fifaPlayer.MatchesPlayed ?? 0;
+                        continue;
+                    }
 
                     context.Players.Add(new Player
                     {
