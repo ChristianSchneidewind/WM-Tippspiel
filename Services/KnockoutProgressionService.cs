@@ -50,6 +50,9 @@ public class KnockoutProgressionService
 
         foreach (var game in knockoutGames.OrderBy(g => g.MatchNumber ?? int.MaxValue))
         {
+            // FIFA-Paarungen niemals überschreiben
+            if (game.ExternalId != null)
+                continue;
             if (!game.MatchNumber.HasValue)
                 continue;
 

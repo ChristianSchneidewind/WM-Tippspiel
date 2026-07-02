@@ -81,6 +81,26 @@ else
                                     var isHomePlaceholder = string.IsNullOrEmpty(game.HomeTeamName);
                                     var isAwayPlaceholder = string.IsNullOrEmpty(game.AwayTeamName);
 
+                                    bool homeWinner = false;
+                                    bool awayWinner = false;
+
+                                    if (game.HomeTeamScore.HasValue && game.AwayTeamScore.HasValue)
+                                    {
+                                        if (game.HomeTeamScore > game.AwayTeamScore)
+                                        {
+                                            homeWinner = true;
+                                        }
+                                        else if (game.HomeTeamScore < game.AwayTeamScore)
+                                        {
+                                            awayWinner = true;
+                                        }
+                                        else if (game.HomeTeamPenaltyScore.HasValue && game.AwayTeamPenaltyScore.HasValue)
+                                        {
+                                            homeWinner = game.HomeTeamPenaltyScore > game.AwayTeamPenaltyScore;
+                                            awayWinner = game.AwayTeamPenaltyScore > game.HomeTeamPenaltyScore;
+                                        }
+                                    }
+
                                     <tr class="border-bottom border-black border-opacity-10">
                                         <td class="ps-3 fw-bold text-success" style="color: #1b5e20 !important;">
                                             #@(game.MatchNumber?.ToString() ?? "-")
@@ -98,7 +118,7 @@ else
                                             <div class="d-flex align-items-center justify-content-center w-100">
                                                 @* Home Team *@
                                                 <div class="text-end d-flex align-items-center justify-content-end" style="flex: 1;">
-                                                    <span class="fw-bold text-dark">
+                                                    <span class="fw-bold @(homeWinner ? "text-success" : "text-dark")">
                                                         @(isHomePlaceholder ? GameHelper.GetPlaceholderName(game.MatchNumber, true) : GameHelper.FixTeamName(game.HomeTeamName))
                                                     </span>
                                                     @if (!isHomePlaceholder)
@@ -115,7 +135,7 @@ else
                                                     {
                                                         <span class="fi @FlagHelper.GetFlagClass(game.AwayTeamName) me-2 shadow-sm"></span>
                                                     }
-                                                    <span class="fw-bold text-dark">
+                                                    <span class="fw-bold @(awayWinner ? "text-success" : "text-dark")">
                                                         @(isAwayPlaceholder ? GameHelper.GetPlaceholderName(game.MatchNumber, false) : GameHelper.FixTeamName(game.AwayTeamName))
                                                     </span>
                                                 </div>
@@ -127,6 +147,11 @@ else
                                             {
                                                 <span class="result-badge text-white shadow-sm" style="background-color: #1b5e20;">
                                                     @game.HomeTeamScore : @game.AwayTeamScore
+                                                    @if (game.HomeTeamPenaltyScore.HasValue && game.AwayTeamPenaltyScore.HasValue)
+                                                    {
+                                                        <br />
+                                                        <small>(@game.HomeTeamPenaltyScore:@game.AwayTeamPenaltyScore i.E.)</small>
+                                                    }
                                                 </span>
                                             }
                                             else

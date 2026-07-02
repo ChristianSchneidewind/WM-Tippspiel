@@ -99,7 +99,7 @@ namespace TippSpiel
                     await FifaKnockoutSeeder.SeedAsync(db);
 
                     // 6. K.o.-Fortschritt aktualisieren
-                    await services.GetRequiredService<KnockoutProgressionService>().SyncAsync(db);
+                    //await services.GetRequiredService<KnockoutProgressionService>().SyncAsync(db);
 
                     // 7. User anlegen
                     await UserSeeder.SeedAsync(services);

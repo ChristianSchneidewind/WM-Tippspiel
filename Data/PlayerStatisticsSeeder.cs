@@ -28,17 +28,14 @@ public static class PlayerStatisticsSeeder
                     continue;
                 var ifesId = game.IfesId;
 
-                Console.WriteLine(
-                    $"Spiel {game.MatchNumber}: IFES {ifesId}");
+                
 
                 var url =
                     $"https://fdh-api.fifa.com/v1/stats/match/{ifesId}/players.json";
 
                 var json = await Http.GetStringAsync(url);
 
-                File.WriteAllText($"stats_{ifesId}.json", json);
-                Console.WriteLine($"JSON gespeichert: stats_{ifesId}.json");
-                Console.WriteLine(json.Substring(0, 300));
+                
 
                 using var doc = JsonDocument.Parse(json);
 
@@ -57,8 +54,7 @@ public static class PlayerStatisticsSeeder
                         playerEntry.Value,
                         "MatchesPlayed");
 
-                    Console.WriteLine(
-                        $"{player.Name} -> {matchesPlayed}");
+                    
 
                     player.Appearances += matchesPlayed;
                 }
